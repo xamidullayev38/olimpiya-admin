@@ -1,9 +1,9 @@
 "use client";
 
 import { Box, Flex, Text, VStack } from "@chakra-ui/react";
-import { Participant } from "@/lib/types";
-import { accreditationByCode } from "@/lib/mock-data";
-import QrGlyph from "./QrGlyph";
+import { Participant } from "@/shared/types";
+import { accreditationByCode } from "@/shared/api/mock-data";
+import QrGlyph from "@/shared/ui/QrGlyph/QrGlyph";
 
 export default function BadgeCard({
   participant,
@@ -98,3 +98,5 @@ export default function BadgeCard({
     </Flex>
   );
 }
+
+

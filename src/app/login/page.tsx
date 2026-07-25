@@ -17,8 +17,8 @@ import {
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuScanLine, LuLock, LuUserRound } from "react-icons/lu";
-import BadgeCard from "@/components/BadgeCard";
-import { participants, liveStats } from "@/lib/mock-data";
+import BadgeCard from "@/entities/Participant/ui/BadgeCard";
+import { participants, liveStats } from "@/shared/api/mock-data";
 import { login } from "@/lib/auth";
 
 function LoginForm() {
@@ -34,9 +34,9 @@ function LoginForm() {
       setError("Foydalanuvchi nomini kiriting");
       return;
     }
-    // connect with POST /api/auth/login 
+    // TODO: backend tayyor bo'lganda shu yerni POST /api/auth/login ga ulang
     login(username || "operator");
-    const from = searchParams.get("from");
+    const from = searchParams?.get("from");
     router.push(from && from !== "/login" ? from : "/dashboard");
   }
 
@@ -236,3 +236,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

@@ -94,6 +94,31 @@ export interface SystemRole {
   name: string;
   permissions: string[];
   usersCount: number;
+  builtIn?: boolean; // default TZ rollari (2-bo'lim) o'chirilmaydi/qayta nomlanmaydi
+}
+
+export interface Permission {
+  key: string;
+  label: string;
+  group: string;
+}
+
+export interface SystemUser {
+  id: string;
+  fullName: string;
+  username: string;
+  roleIds: string[];
+  status: "faol" | "bloklangan";
+  lastActive: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  actor: string; // system user fullName
+  action: string;
+  target: string;
+  timestamp: string;
+  details?: string;
 }
 
 export interface LiveStat {

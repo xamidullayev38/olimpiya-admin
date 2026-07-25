@@ -1,5 +1,5 @@
 import { Flex, Box } from "@chakra-ui/react";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/widgets/Sidebar/ui/Sidebar";
 
 export default function ConsoleLayout({
   children,
@@ -15,3 +15,4 @@ export default function ConsoleLayout({
     </Flex>
   );
 }
+

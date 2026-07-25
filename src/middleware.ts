@@ -8,6 +8,7 @@ const PROTECTED_PREFIXES = [
   "/zones",
   "/meal-tracking",
   "/reports",
+  "/settings",
 ];
 
 export function middleware(request: NextRequest) {
@@ -32,5 +33,6 @@ export const config = {
     "/zones/:path*",
     "/meal-tracking/:path*",
     "/reports/:path*",
+    "/settings/:path*",
   ],
 };

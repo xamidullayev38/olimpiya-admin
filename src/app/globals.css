@@ -1,0 +1,16 @@
+/* Odatda hamma narsa ekranda ko'rinadi; chop etishda faqat
+   #printable-badge ko'rinadi (badge chop etish funksiyasi uchun) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printable-badge,
+  #printable-badge * {
+    visibility: visible;
+  }
+  #printable-badge {
+    position: fixed;
+    top: 24px;
+    left: 24px;
+  }
+}

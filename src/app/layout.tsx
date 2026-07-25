@@ -1,3 +1,4 @@
+import "./globals.css";
 import "@fontsource/space-grotesk/500.css";
 import "@fontsource/space-grotesk/600.css";
 import "@fontsource/space-grotesk/700.css";
@@ -6,8 +7,11 @@ import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
+import "@fontsource/outfit/500.css";
+import "@fontsource/outfit/600.css";
+import "@fontsource/outfit/700.css";
 import type { Metadata } from "next";
-import Providers from "@/theme/Providers";
+import Providers from "@/shared/config/theme/Providers";
 
 export const metadata: Metadata = {
   title: "QR Badge Tizimi — Boshqaruv paneli",
@@ -25,7 +29,7 @@ export default function RootLayout({
       lang="uz"
       style={
         {
-          "--font-display": "'Space Grotesk', sans-serif",
+          "--font-display": "'Outfit', 'Space Grotesk', sans-serif",
           "--font-body": "'Inter', sans-serif",
           "--font-mono": "'IBM Plex Mono', monospace",
         } as React.CSSProperties

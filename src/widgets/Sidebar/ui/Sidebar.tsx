@@ -11,6 +11,7 @@ import {
   LuFileSpreadsheet,
   LuScanLine,
   LuShieldCheck,
+  LuSettings,
 } from "react-icons/lu";
 
 const nav = [
@@ -19,6 +20,7 @@ const nav = [
   { href: "/zones", label: "Zonalar", icon: LuMapPin },
   { href: "/meal-tracking", label: "Ovqatlanish nazorati", icon: LuUtensils },
   { href: "/reports", label: "Hisobotlar", icon: LuFileSpreadsheet },
+  { href: "/settings", label: "Sozlamalar", icon: LuSettings },
 ];
 
 export default function Sidebar() {
