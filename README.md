@@ -47,15 +47,3 @@ src/
     mock-data.ts                — API ulanguncha ishlatiladigan namunaviy ma'lumot
   theme/index.ts                — Chakra dizayn tokenlari (rang, shrift, komponent variantlari)
 ```
-
-## Keyingi qadam: backend API ulash
-
-`src/lib/mock-data.ts` eksportlarini TZ 7-bo'limidagi endpointlarga (masalan
-`GET /api/participants`, `POST /api/scan/access`, `GET /api/dashboard/live-stats`)
-mos fetch funksiyalariga almashtiring. Komponentlar (`ParticipantsPage`,
-`DashboardPage` va h.k.) `Participant[]`, `Zone[]`, `AccessLogEntry[]` kabi
-tiplarni kutadi — mock massiv o'rniga real ma'lumot kelsa, UI o'zgarishsiz ishlaydi.
-
-Auth (`/login`) hozircha shunchaki `/dashboard`ga o'tkazadi — JWT bilan
-`POST /api/auth/login`ga ulash va tokenni saqlash (masalan HTTP-only cookie)
-qoladi.
