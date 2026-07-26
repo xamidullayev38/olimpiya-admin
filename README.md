@@ -28,22 +28,3 @@ npm run dev
 | `/zones` | Zonalar, sig'im/to'lish, ruxsat etilgan akkreditatsiya turlari | 3.3, FT-7 |
 | `/meal-tracking` | Ovqatlanish jadvali va log — "kuniga bir marta" qoidasi | FT-11..FT-14 |
 | `/reports` | Rad etilgan urinishlar, kirish tarixi, ovqatlanish statistikasi, eksport | FT-21..FT-25 |
-
-## Struktura
-
-```
-src/
-  app/
-    login/page.tsx            — auth sahifasi (console layout'siz)
-    (console)/layout.tsx       — sidebar + topbar shell
-    (console)/dashboard/       — boshqaruv paneli
-    (console)/participants/
-    (console)/zones/
-    (console)/meal-tracking/
-    (console)/reports/
-  components/                  — Sidebar, Topbar, BadgeCard, StatusPill, StatCard, QrGlyph
-  lib/
-    types.ts                   — TZ 3-bo'limdagi entity modelga mos TS tiplar
-    mock-data.ts                — API ulanguncha ishlatiladigan namunaviy ma'lumot
-  theme/index.ts                — Chakra dizayn tokenlari (rang, shrift, komponent variantlari)
-```
