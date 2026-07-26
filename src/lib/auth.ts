@@ -9,22 +9,27 @@ export async function loginWithApi(username: string, password?: string) {
       method: "POST",
       body: JSON.stringify({
         username,
-        password: password || "operator123", // default fallback if demo mode
+        password: password || "operator123",
       }),
+      timeoutMs: 3000, // 3-second fast timeout
     });
 
     if (response && response.accessToken) {
       storeAuthTokens(response.accessToken, response.refreshToken, response.user);
-      // Legacy session cookie for middleware
       const maxAge = 60 * 60 * 24 * 7;
       document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(
         response.user?.username || username
       )}; path=/; max-age=${maxAge}; SameSite=Lax`;
       return { success: true, user: response.user };
     }
-    throw new Error("Token olinmadi");
+    return { success: false, error: "Token olinmadi" };
   } catch (err: any) {
-    // If backend is not running/unreachable, fallback to local session mode so UI remains usable for demonstration
+    // If backend returned HTTP 401 / 403 / 400, show real invalid credentials error!
+    if (err.status && err.status > 0) {
+      return { success: false, error: err.message || "Login yoki parol noto'g'ri" };
+    }
+
+    // ONLY if backend is completely offline/unreachable (status 0), fallback to local demo mode
     loginLocal(username);
     return { success: true, isMock: true, error: err.message };
   }

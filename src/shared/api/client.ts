@@ -47,6 +47,7 @@ export function clearAuthTokens() {
 interface RequestOptions extends RequestInit {
   params?: Record<string, any>;
   isRetry?: boolean;
+  timeoutMs?: number;
 }
 
 export class ApiError extends Error {
@@ -65,7 +66,7 @@ export async function apiClient<T = any>(
   endpoint: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { params, isRetry = false, headers: customHeaders, ...customConfig } = options;
+  const { params, isRetry = false, timeoutMs = 3500, headers: customHeaders, ...customConfig } = options;
 
   let url = endpoint.startsWith("http") ? endpoint : `${API_BASE_URL}${endpoint}`;
 
@@ -95,11 +96,16 @@ export async function apiClient<T = any>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch(url, {
       ...customConfig,
       headers,
+      signal: controller.signal,
     });
+    clearTimeout(timer);
 
     if (response.status === 401 && !isRetry && !endpoint.includes("/auth/")) {
       // Refresh token attempt
@@ -151,8 +157,12 @@ export async function apiClient<T = any>(
     }
     return (await response.blob()) as unknown as T;
   } catch (err: any) {
+    clearTimeout(timer);
     if (err instanceof ApiError) {
       throw err;
+    }
+    if (err.name === "AbortError") {
+      throw new ApiError("Serverdan javob kutish vaqti tugadi (Timeout)", 0);
     }
     throw new ApiError(err.message || "Tarmoq xatosi yoki server ishlamayapti", 0);
   }
