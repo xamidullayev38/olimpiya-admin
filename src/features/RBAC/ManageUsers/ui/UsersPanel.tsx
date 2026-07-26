@@ -25,51 +25,64 @@ import {
   Input,
   Select,
   Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { LuPlus } from "react-icons/lu";
 import { SystemUser } from "@/shared/types";
-import { fetchUsers, fetchRoles } from "@/shared/api/services";
-import { roles as initialRoles } from "@/shared/api/mock-data";
+import { fetchUsers, fetchRoles, createUserApi } from "@/shared/api/services";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
 export function UsersPanel() {
   const [users, setUsers] = useState<SystemUser[]>([]);
-  const [roles, setRoles] = useState<any[]>(initialRoles);
+  const [roles, setRoles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [name, setName] = useState("");
-  const [roleId, setRoleId] = useState(initialRoles[1]?.id || "r2");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [roleId, setRoleId] = useState("");
+  const toast = useToast();
+
+  async function loadData() {
+    setLoading(true);
+    try {
+      const uData = await fetchUsers();
+      const rData = await fetchRoles();
+      setUsers(uData);
+      setRoles(rData);
+      if (rData.length > 0 && !roleId) {
+        setRoleId(rData[0].id);
+      }
+    } catch {
+      // silent catch
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function loadData() {
-      setLoading(true);
-      try {
-        const uData = await fetchUsers();
-        const rData = await fetchRoles();
-        setUsers(uData);
-        setRoles(rData);
-      } catch {
-        // silent catch
-      } finally {
-        setLoading(false);
-      }
-    }
     loadData();
   }, []);
 
-  function addUser() {
+  async function addUser() {
     if (name.trim() === "") return;
-    const user: SystemUser = {
-      id: `U-${Date.now()}`,
-      fullName: name.trim(),
-      username: name.trim().toLowerCase().replace(/\s+/g, ".") + ".uz",
-      roleIds: [roleId],
-      status: "faol",
-      lastActive: "—",
-    };
-    setUsers((prev) => [user, ...prev]);
-    setName("");
-    onClose();
+    try {
+      const uName = username.trim() || name.trim().toLowerCase().replace(/\s+/g, ".");
+      const created = await createUserApi({
+        fullName: name.trim(),
+        username: uName,
+        password: password || "Password123!",
+        roleIds: roleId ? [roleId] : [],
+      });
+      setUsers((prev) => [created, ...prev]);
+      setName("");
+      setUsername("");
+      setPassword("");
+      onClose();
+      toast({ title: "Xodim muvaffaqiyatli saqlandi", status: "success", duration: 3000 });
+    } catch (err: any) {
+      toast({ title: "Xodim qo'shishda xatolik", description: err.message, status: "error", duration: 3000 });
+    }
   }
 
   return (
@@ -149,6 +162,29 @@ export function UsersPanel() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="masalan: Kamron Yusupov"
+              />
+            </FormControl>
+            <FormControl mb={4}>
+              <FormLabel fontSize="13px" color="ink.500">
+                Foydalanuvchi nomi (Login)
+              </FormLabel>
+              <Input
+                variant="outline"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="kamron.yusupov"
+              />
+            </FormControl>
+            <FormControl mb={4}>
+              <FormLabel fontSize="13px" color="ink.500">
+                Parol
+              </FormLabel>
+              <Input
+                type="password"
+                variant="outline"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
               />
             </FormControl>
             <FormControl>

@@ -2,8 +2,17 @@
 
 import { Box, Flex, Text, VStack } from "@chakra-ui/react";
 import { Participant } from "@/shared/types";
-import { accreditationByCode } from "@/shared/api/mock-data";
 import QrGlyph from "@/shared/ui/QrGlyph/QrGlyph";
+
+const ACC_COLORS: Record<string, { color: string; name: string }> = {
+  ATH: { color: "#4C8DFF", name: "Sportchi" },
+  COACH: { color: "#3FB67F", name: "Murabbiy" },
+  REF: { color: "#E8A23D", name: "Hakam" },
+  VOL: { color: "#9C7830", name: "Volontyor" },
+  DEL: { color: "#8D96A8", name: "Delegatsiya a'zosi" },
+  MEDIA: { color: "#D4A853", name: "Jurnalist" },
+  VIP: { color: "#E5484D", name: "VIP mehmon" },
+};
 
 export default function BadgeCard({
   participant,
@@ -12,8 +21,12 @@ export default function BadgeCard({
   participant: Participant;
   compact?: boolean;
 }) {
-  const acc = accreditationByCode(participant.accreditation);
-  const initials = participant.fullName
+  const acc = ACC_COLORS[participant.accreditation] || {
+    color: "#2563eb",
+    name: participant.accreditation || "Ishtirokchi",
+  };
+
+  const initials = (participant.fullName || "A B")
     .split(" ")
     .map((n) => n[0])
     .slice(0, 2)
@@ -38,7 +51,7 @@ export default function BadgeCard({
             color="ink.500"
             letterSpacing="0.08em"
           >
-            IBU-2026 · ACCREDITATION
+            AKKREDITATSIYA
           </Text>
           <Text
             fontFamily="mono"
@@ -47,7 +60,7 @@ export default function BadgeCard({
             fontWeight="600"
             letterSpacing="0.06em"
           >
-            {acc.code}
+            {participant.accreditation}
           </Text>
         </Flex>
 
@@ -78,7 +91,7 @@ export default function BadgeCard({
               {participant.fullName}
             </Text>
             <Text fontSize="xs" color="ink.500" noOfLines={1}>
-              {acc.name} · {participant.organization}
+              {acc.name} · {participant.organization || "—"}
             </Text>
           </VStack>
         </Flex>
@@ -86,17 +99,15 @@ export default function BadgeCard({
         <Flex justify="space-between" align="flex-end">
           <VStack align="start" spacing={0}>
             <Text fontFamily="mono" fontSize="xs" color="ink.700">
-              {participant.badgeId}
+              {participant.badgeId || "BADGE"}
             </Text>
             <Text fontFamily="mono" fontSize="10px" color="ink.300">
-              tkn:{participant.qrToken.slice(0, 10)}…
+              tkn:{(participant.qrToken || "").slice(0, 10)}…
             </Text>
           </VStack>
-          <QrGlyph seed={participant.qrToken} size={compact ? 40 : 52} />
+          <QrGlyph seed={participant.qrToken || participant.id} size={compact ? 40 : 52} />
         </Flex>
       </VStack>
     </Flex>
   );
 }
-
-

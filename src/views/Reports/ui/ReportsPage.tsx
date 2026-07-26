@@ -28,9 +28,18 @@ import Topbar from "@/widgets/Topbar/ui/Topbar";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { fetchAccessLogs, fetchMealLogs } from "@/shared/api/services";
 import { AccessLogEntry, MealLogEntry } from "@/shared/types";
-import { accreditationByCode, zoneByCode } from "@/shared/api/mock-data";
 import { API_BASE_URL, ENDPOINTS } from "@/shared/api/endpoints";
 import { getAccessToken } from "@/shared/api/client";
+
+const ACC_COLORS: Record<string, { color: string; name: string }> = {
+  ATH: { color: "#4C8DFF", name: "Sportchi" },
+  COACH: { color: "#3FB67F", name: "Murabbiy" },
+  REF: { color: "#E8A23D", name: "Hakam" },
+  VOL: { color: "#9C7830", name: "Volontyor" },
+  DEL: { color: "#8D96A8", name: "Delegatsiya a'zosi" },
+  MEDIA: { color: "#D4A853", name: "Jurnalist" },
+  VIP: { color: "#E5484D", name: "VIP mehmon" },
+};
 
 export default function ReportsPage() {
   const [accessLogs, setAccessLogs] = useState<AccessLogEntry[]>([]);
@@ -138,8 +147,7 @@ export default function ReportsPage() {
                     </Thead>
                     <Tbody>
                       {denials.map((d) => {
-                        const acc = accreditationByCode(d.accreditation);
-                        const zone = zoneByCode(d.zoneCode);
+                        const acc = ACC_COLORS[d.accreditation] || { color: "#2563eb", name: d.accreditation };
                         return (
                           <Tr key={d.id} _hover={{ bg: "surface.700" }}>
                             <Td fontWeight="600" color="ink.900">{d.participantName}</Td>
@@ -148,7 +156,7 @@ export default function ReportsPage() {
                                 {acc.name}
                               </Badge>
                             </Td>
-                            <Td>{zone.name}</Td>
+                            <Td>{d.zoneCode}</Td>
                             <Td fontFamily="mono" fontSize="12px">{d.timestamp}</Td>
                             <Td fontFamily="mono" fontSize="12px" color="ink.500">{d.device}</Td>
                             <Td>
@@ -178,11 +186,10 @@ export default function ReportsPage() {
                     </Thead>
                     <Tbody>
                       {accessLogs.slice(0, 25).map((l) => {
-                        const zone = zoneByCode(l.zoneCode);
                         return (
                           <Tr key={l.id} _hover={{ bg: "surface.700" }}>
                             <Td fontWeight="600" color="ink.900">{l.participantName}</Td>
-                            <Td>{zone.name}</Td>
+                            <Td>{l.zoneCode}</Td>
                             <Td>
                               <Badge
                                 bg={l.direction === "IN" ? "signal.blueDim" : "surface.600"}

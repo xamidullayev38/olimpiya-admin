@@ -19,7 +19,16 @@ import StatCard from "@/shared/ui/StatCard/StatCard";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { LiveStat, AccessLogEntry } from "@/shared/types";
 import { fetchLiveStats, fetchAccessLogs } from "@/shared/api/services";
-import { accreditationByCode } from "@/shared/api/mock-data";
+
+const ACC_COLORS: Record<string, string> = {
+  ATH: "#4C8DFF",
+  COACH: "#3FB67F",
+  REF: "#E8A23D",
+  VOL: "#9C7830",
+  DEL: "#8D96A8",
+  MEDIA: "#D4A853",
+  VIP: "#E5484D",
+};
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<LiveStat[]>([]);
@@ -41,7 +50,7 @@ export default function DashboardPage() {
         setTotals(totals);
         setDenials(logs.filter((l) => l.result === "rad").slice(0, 6));
       } catch {
-        // silent fallback
+        // silent catch
       } finally {
         setLoading(false);
       }
@@ -201,7 +210,7 @@ export default function DashboardPage() {
                     </Text>
                     <VStack align="stretch" spacing={4}>
                       {denials.map((d) => {
-                        const acc = accreditationByCode(d.accreditation);
+                        const color = ACC_COLORS[d.accreditation] || "#2563eb";
                         return (
                           <Flex
                             key={d.id}
@@ -217,7 +226,7 @@ export default function DashboardPage() {
                           >
                             <VStack align="start" spacing={1.5}>
                               <HStack spacing={2}>
-                                <Box w="8px" h="8px" borderRadius="full" bg={acc.color} boxShadow={`0 0 8px ${acc.color}`} />
+                                <Box w="8px" h="8px" borderRadius="full" bg={color} boxShadow={`0 0 8px ${color}`} />
                                 <Text fontSize="14px" fontWeight="600" color="ink.900">
                                   {d.participantName}
                                 </Text>

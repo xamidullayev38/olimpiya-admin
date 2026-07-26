@@ -23,7 +23,16 @@ import Topbar from "@/widgets/Topbar/ui/Topbar";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { fetchMealSchedule, fetchMealLogs } from "@/shared/api/services";
 import { MealType, MealWindow, MealLogEntry } from "@/shared/types";
-import { accreditationByCode } from "@/shared/api/mock-data";
+
+const ACC_COLORS: Record<string, { color: string; name: string }> = {
+  ATH: { color: "#4C8DFF", name: "Sportchi" },
+  COACH: { color: "#3FB67F", name: "Murabbiy" },
+  REF: { color: "#E8A23D", name: "Hakam" },
+  VOL: { color: "#9C7830", name: "Volontyor" },
+  DEL: { color: "#8D96A8", name: "Delegatsiya a'zosi" },
+  MEDIA: { color: "#D4A853", name: "Jurnalist" },
+  VIP: { color: "#E5484D", name: "VIP mehmon" },
+};
 
 export default function MealTrackingPage() {
   const [filter, setFilter] = useState<MealType | "ALL">("ALL");
@@ -108,7 +117,7 @@ export default function MealTrackingPage() {
                   </Text>
                   <HStack wrap="wrap" spacing={1.5}>
                     {m.allowedAccreditations?.map((code) => {
-                      const acc = accreditationByCode(code);
+                      const acc = ACC_COLORS[code] || { color: "#2563eb", name: code };
                       return (
                         <Badge key={code} bg={`${acc.color}22`} color={acc.color} px={2} py={0.5} fontSize="11px">
                           {acc.name}
@@ -160,7 +169,7 @@ export default function MealTrackingPage() {
                 </Thead>
                 <Tbody>
                   {filtered.map((m) => {
-                    const acc = accreditationByCode(m.accreditation);
+                    const acc = ACC_COLORS[m.accreditation] || { color: "#2563eb", name: m.accreditation || "Ishtirokchi" };
                     return (
                       <Tr key={m.id} _hover={{ bg: "surface.700" }}>
                         <Td fontWeight="600" color="ink.900">{m.participantName}</Td>

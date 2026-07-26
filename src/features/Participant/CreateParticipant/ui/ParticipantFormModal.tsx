@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Modal,
   ModalOverlay,
@@ -15,8 +15,8 @@ import {
   Input,
   Select,
 } from "@chakra-ui/react";
-import { Participant, AccreditationCode } from "@/shared/types";
-import { accreditationTypes } from "@/shared/api/mock-data";
+import { Participant, AccreditationCode, AccreditationType } from "@/shared/types";
+import { fetchAccreditationTypes } from "@/shared/api/services";
 
 export function ParticipantFormModal({
   isOpen,
@@ -42,6 +42,15 @@ export function ParticipantFormModal({
   const [organization, setOrganization] = useState(initial?.organization ?? "");
   const [accreditation, setAccreditation] = useState<AccreditationCode>(initial?.accreditation ?? "ATH");
   const [sport, setSport] = useState(initial?.sport ?? "");
+  const [types, setTypes] = useState<AccreditationType[]>([]);
+
+  useEffect(() => {
+    async function loadTypes() {
+      const data = await fetchAccreditationTypes();
+      setTypes(data);
+    }
+    if (isOpen) loadTypes();
+  }, [isOpen]);
 
   const lastInitialId = useRef<string | null>(null);
   if (isOpen && initial?.id !== lastInitialId.current) {
@@ -95,9 +104,13 @@ export function ParticipantFormModal({
               <FormControl>
                 <FormLabel fontSize="13px" color="ink.500">Akkreditatsiya turi</FormLabel>
                 <Select variant="outline" value={accreditation} onChange={(e) => setAccreditation(e.target.value as AccreditationCode)}>
-                  {accreditationTypes.map((a) => (
-                    <option key={a.code} value={a.code} style={{background: '#12151B'}}>{a.name}</option>
-                  ))}
+                  {types.length > 0 ? (
+                    types.map((a) => (
+                      <option key={a.code} value={a.code} style={{ background: "#12151B" }}>{a.name}</option>
+                    ))
+                  ) : (
+                    <option value="ATH" style={{ background: "#12151B" }}>Sportchi</option>
+                  )}
                 </Select>
               </FormControl>
               <FormControl>

@@ -22,7 +22,7 @@ import { ParticipantFormModal } from "@/features/Participant/CreateParticipant/u
 import { ImportModal } from "@/features/Participant/ImportParticipants/ui/ImportModal";
 import { ParticipantHistoryDrawer } from "@/entities/Participant/ui/ParticipantHistoryDrawer";
 import BadgeCard from "@/entities/Participant/ui/BadgeCard";
-import { Participant, BadgeStatus, AccreditationCode } from "@/shared/types";
+import { Participant, BadgeStatus } from "@/shared/types";
 import {
   fetchParticipants,
   createParticipantApi,
@@ -30,11 +30,6 @@ import {
   unblockParticipantApi,
   fetchAccreditationTypes,
 } from "@/shared/api/services";
-import {
-  accessLogs,
-  mealLogs,
-  zoneByCode,
-} from "@/shared/api/mock-data";
 
 export function ParticipantsPage() {
   const [list, setList] = useState<Participant[]>([]);
@@ -83,31 +78,6 @@ export function ParticipantsPage() {
       return matchesQuery && matchesAcc;
     });
   }, [list, query, accFilter]);
-
-  const history = useMemo(() => {
-    if (!selected) return [];
-    const access = accessLogs
-      .filter((l) => l.participantId === selected.id)
-      .map((l) => ({
-        id: l.id,
-        kind: "Zona" as const,
-        label: `${zoneByCode(l.zoneCode).name} · ${l.direction}`,
-        timestamp: l.timestamp,
-        result: l.result,
-        reason: l.reason,
-      }));
-    const meal = mealLogs
-      .filter((l) => l.participantId === selected.id)
-      .map((l) => ({
-        id: l.id,
-        kind: "Ovqat" as const,
-        label: l.mealType,
-        timestamp: l.timestamp,
-        result: l.result,
-        reason: l.reason,
-      }));
-    return [...access, ...meal].sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1));
-  }, [selected?.id]);
 
   function openCreate() {
     setEditing(null);
@@ -260,7 +230,7 @@ export function ParticipantsPage() {
           isOpen={historyDrawer.isOpen}
           onClose={historyDrawer.onClose}
           participant={selected}
-          history={history}
+          history={[]}
         />
       )}
 

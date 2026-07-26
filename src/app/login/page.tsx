@@ -18,8 +18,6 @@ import {
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuScanLine, LuLock, LuUserRound } from "react-icons/lu";
-import BadgeCard from "@/entities/Participant/ui/BadgeCard";
-import { participants, liveStats } from "@/shared/api/mock-data";
 import { loginWithApi } from "@/lib/auth";
 
 function LoginForm() {
@@ -27,8 +25,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const toast = useToast();
   const [mode, setMode] = useState<"password" | "pin">("password");
-  const [username, setUsername] = useState("operator.tashkent");
-  const [password, setPassword] = useState("operator123");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -108,20 +106,12 @@ function LoginForm() {
           </Text>
         </VStack>
 
-        <HStack spacing={4} wrap="wrap">
-          <BadgeCard participant={participants[0]} compact />
-          <VStack align="start" spacing={3} pt={2}>
-            {liveStats.slice(0, 3).map((s) => (
-              <HStack key={s.zoneCode} spacing={3} fontSize="13px">
-                <Box w="6px" h="6px" borderRadius="full" bg="signal.green" />
-                <Text color="ink.500" minW="180px">{s.zoneName}</Text>
-                <Text fontFamily="mono" color="ink.900" fontWeight="600">
-                  {s.inside}
-                </Text>
-              </HStack>
-            ))}
-          </VStack>
-        </HStack>
+        <VStack align="start" spacing={2} pt={2}>
+          <HStack spacing={3} fontSize="13px">
+            <Box w="6px" h="6px" borderRadius="full" bg="signal.green" />
+            <Text color="ink.500">Akkreditatsiya va zona boshqaruvi tizimi</Text>
+          </HStack>
+        </VStack>
       </Flex>
 
       {/* Right: login form */}
@@ -185,7 +175,7 @@ function LoginForm() {
                   <LuUserRound size={16} color="#5C6577" />
                   <Input
                     variant="unstyled"
-                    placeholder="operator.tashkent"
+                    placeholder="foydalanuvchi nomi"
                     py={2.5}
                     color="ink.900"
                     value={username}

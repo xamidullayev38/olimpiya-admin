@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Flex,
   Button,
@@ -28,38 +28,70 @@ import {
   Input,
   Checkbox,
   CheckboxGroup,
+  Spinner,
+  useToast,
 } from "@chakra-ui/react";
 import { LuPlus } from "react-icons/lu";
-import { AccreditationType, AccreditationCode } from "@/shared/types";
-import { accreditationTypes as initialAccTypes, zones } from "@/shared/api/mock-data";
+import { AccreditationType, AccreditationCode, Zone } from "@/shared/types";
+import {
+  fetchAccreditationTypes,
+  fetchZones,
+  createAccreditationTypeApi,
+} from "@/shared/api/services";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
 export function AccreditationTypesPanel() {
-  const [types, setTypes] = useState<AccreditationType[]>(initialAccTypes);
+  const [types, setTypes] = useState<AccreditationType[]>([]);
+  const [zones, setZones] = useState<Zone[]>([]);
+  const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [color, setColor] = useState("#4C8DFF");
   const [mealAllowed, setMealAllowed] = useState(true);
   const [selectedZones, setSelectedZones] = useState<string[]>([]);
 
+  async function loadData() {
+    setLoading(true);
+    try {
+      const aData = await fetchAccreditationTypes();
+      const zData = await fetchZones();
+      setTypes(aData);
+      setZones(zData);
+    } catch {
+      // silent catch
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const canSave = name.trim() !== "" && code.trim() !== "";
 
-  function addType() {
+  async function addType() {
     if (!canSave) return;
-    const t: AccreditationType = {
-      code: code.trim().toUpperCase() as AccreditationCode,
-      name: name.trim(),
-      color,
-      allowedZoneCodes: selectedZones,
-      mealAllowed,
-    };
-    setTypes((prev) => [...prev, t]);
-    setName("");
-    setCode("");
-    setSelectedZones([]);
-    setMealAllowed(true);
-    onClose();
+    try {
+      const created = await createAccreditationTypeApi({
+        name: name.trim(),
+        code: code.trim().toUpperCase(),
+        color,
+        mealAllowed,
+      });
+      setTypes((prev) => [...prev, created]);
+      setName("");
+      setCode("");
+      setSelectedZones([]);
+      setMealAllowed(true);
+      onClose();
+      toast({ title: "Akkreditatsiya turi saqlandi", status: "success", duration: 3000 });
+    } catch (err: any) {
+      toast({ title: "Saqlashda xatolik", description: err.message, status: "error", duration: 3000 });
+    }
   }
 
   return (
@@ -69,50 +101,56 @@ export function AccreditationTypesPanel() {
           Yangi tur qo'shish
         </Button>
       </Flex>
-      <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="lg" overflow="hidden" className="glass-panel" style={{background: 'rgba(27, 32, 40, 0.4)'}}>
-        <Table size="sm">
-          <Thead>
-            <Tr>
-              <Th>Nomi</Th>
-              <Th>Kodi</Th>
-              <Th>Rang</Th>
-              <Th>Ruxsat etilgan zonalar</Th>
-              <Th>Ovqatlanish</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {types.map((t) => (
-              <Tr key={t.code} _hover={{ bg: "surface.700" }}>
-                <Td fontWeight="600" color="ink.900">
-                  {t.name}
-                </Td>
-                <Td fontFamily="mono" fontSize="12px">{t.code}</Td>
-                <Td>
-                  <HStack spacing={2}>
-                    <Box w="14px" h="14px" borderRadius="4px" bg={t.color} />
-                    <Text fontFamily="mono" fontSize="11px" color="ink.500">{t.color}</Text>
-                  </HStack>
-                </Td>
-                <Td>
-                  <Wrap spacing={1}>
-                    {t.allowedZoneCodes.map((zc) => (
-                      <WrapItem key={zc}>
-                        <Badge bg="surface.600" color="ink.700" fontSize="10px">{zc}</Badge>
-                      </WrapItem>
-                    ))}
-                  </Wrap>
-                </Td>
-                <Td>
-                  <StatusPill
-                    label={t.mealAllowed ? "Ruxsat bor" : "Ruxsat yo'q"}
-                    tone={t.mealAllowed ? "success" : "neutral"}
-                  />
-                </Td>
+      {loading ? (
+        <Flex justify="center" py={8}>
+          <Spinner color="gold.400" size="lg" />
+        </Flex>
+      ) : (
+        <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="lg" overflow="hidden" className="glass-panel" style={{ background: "rgba(27, 32, 40, 0.4)" }}>
+          <Table size="sm">
+            <Thead>
+              <Tr>
+                <Th>Nomi</Th>
+                <Th>Kodi</Th>
+                <Th>Rang</Th>
+                <Th>Ruxsat etilgan zonalar</Th>
+                <Th>Ovqatlanish</Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </Box>
+            </Thead>
+            <Tbody>
+              {types.map((t) => (
+                <Tr key={t.code} _hover={{ bg: "surface.700" }}>
+                  <Td fontWeight="600" color="ink.900">
+                    {t.name}
+                  </Td>
+                  <Td fontFamily="mono" fontSize="12px">{t.code}</Td>
+                  <Td>
+                    <HStack spacing={2}>
+                      <Box w="14px" h="14px" borderRadius="4px" bg={t.color} />
+                      <Text fontFamily="mono" fontSize="11px" color="ink.500">{t.color}</Text>
+                    </HStack>
+                  </Td>
+                  <Td>
+                    <Wrap spacing={1}>
+                      {(t.allowedZoneCodes || []).map((zc) => (
+                        <WrapItem key={zc}>
+                          <Badge bg="surface.600" color="ink.700" fontSize="10px">{zc}</Badge>
+                        </WrapItem>
+                      ))}
+                    </Wrap>
+                  </Td>
+                  <Td>
+                    <StatusPill
+                      label={t.mealAllowed ? "Ruxsat bor" : "Ruxsat yo'q"}
+                      tone={t.mealAllowed ? "success" : "neutral"}
+                    />
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </Box>
+      )}
 
       <Modal isOpen={isOpen} onClose={onClose} size="lg">
         <ModalOverlay />

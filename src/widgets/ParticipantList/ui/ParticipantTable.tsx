@@ -23,13 +23,22 @@ import {
   LuCircleCheck,
 } from "react-icons/lu";
 import { Participant, BadgeStatus } from "@/shared/types";
-import { accreditationByCode } from "@/shared/api/mock-data";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
 const statusTone: Record<BadgeStatus, { label: string; tone: "success" | "danger" | "warning" }> = {
   faol: { label: "Faol", tone: "success" },
   bloklangan: { label: "Bloklangan", tone: "danger" },
   muddati_tugagan: { label: "Muddati tugagan", tone: "warning" },
+};
+
+const ACC_COLORS: Record<string, { color: string; name: string }> = {
+  ATH: { color: "#4C8DFF", name: "Sportchi" },
+  COACH: { color: "#3FB67F", name: "Murabbiy" },
+  REF: { color: "#E8A23D", name: "Hakam" },
+  VOL: { color: "#9C7830", name: "Volontyor" },
+  DEL: { color: "#8D96A8", name: "Delegatsiya a'zosi" },
+  MEDIA: { color: "#D4A853", name: "Jurnalist" },
+  VIP: { color: "#E5484D", name: "VIP mehmon" },
 };
 
 export function ParticipantTable({
@@ -48,7 +57,7 @@ export function ParticipantTable({
   onPrint: (p: Participant) => void;
 }) {
   return (
-    <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="xl" overflow="hidden" className="glass-panel" style={{background: 'rgba(27, 32, 40, 0.4)'}}>
+    <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="xl" overflow="hidden" className="glass-panel" style={{ background: "rgba(27, 32, 40, 0.4)" }}>
       <Table size="sm">
         <Thead>
           <Tr>
@@ -62,8 +71,8 @@ export function ParticipantTable({
         </Thead>
         <Tbody>
           {participants.map((p) => {
-            const acc = accreditationByCode(p.accreditation);
-            const st = statusTone[p.badgeStatus];
+            const acc = ACC_COLORS[p.accreditation] || { color: "#2563eb", name: p.accreditation || "Ishtirokchi" };
+            const st = statusTone[p.badgeStatus] || { label: "Faol", tone: "success" };
             const active = selectedId === p.id;
             return (
               <Tr
