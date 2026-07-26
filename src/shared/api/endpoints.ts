@@ -7,6 +7,7 @@ export const ENDPOINTS = {
     REFRESH: "/auth/refresh",
     LOGOUT: "/auth/logout",
     CHANGE_PASSWORD: "/auth/change-password",
+    ME: "/auth/me",
   },
   DASHBOARD: {
     LIVE_STATS: "/dashboard/live-stats",

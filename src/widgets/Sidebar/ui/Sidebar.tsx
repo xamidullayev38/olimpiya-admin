@@ -3,6 +3,7 @@
 import { Box, Flex, Text, VStack, HStack } from "@chakra-ui/react";
 import NextLink from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LuLayoutDashboard,
   LuUsers,
@@ -13,18 +14,71 @@ import {
   LuShieldCheck,
   LuSettings,
 } from "react-icons/lu";
+import { getStoredUser, hasPermission, UserProfile } from "@/lib/auth";
 
-const nav = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: any;
+  permission?: string;
+  roles?: string[];
+}
+
+const navItems: NavItem[] = [
   { href: "/dashboard", label: "Boshqaruv paneli", icon: LuLayoutDashboard },
-  { href: "/participants", label: "Ishtirokchilar", icon: LuUsers },
-  { href: "/zones", label: "Zonalar", icon: LuMapPin },
-  { href: "/meal-tracking", label: "Ovqatlanish nazorati", icon: LuUtensils },
-  { href: "/reports", label: "Hisobotlar", icon: LuFileSpreadsheet },
-  { href: "/settings", label: "Sozlamalar", icon: LuSettings },
+  {
+    href: "/participants",
+    label: "Ishtirokchilar",
+    icon: LuUsers,
+    permission: "participant.read",
+    roles: ["SUPER_ADMIN", "OPERATOR", "ZONE_MANAGER"],
+  },
+  {
+    href: "/zones",
+    label: "Zonalar",
+    icon: LuMapPin,
+    permission: "zone.manage",
+    roles: ["SUPER_ADMIN", "ZONE_MANAGER"],
+  },
+  {
+    href: "/meal-tracking",
+    label: "Ovqatlanish nazorati",
+    icon: LuUtensils,
+    permission: "meal.read",
+    roles: ["SUPER_ADMIN", "ZONE_MANAGER", "OPERATOR"],
+  },
+  {
+    href: "/reports",
+    label: "Hisobotlar",
+    icon: LuFileSpreadsheet,
+    permission: "report.export",
+    roles: ["SUPER_ADMIN", "ANALYST", "ZONE_MANAGER"],
+  },
+  {
+    href: "/settings",
+    label: "Sozlamalar",
+    icon: LuSettings,
+    permission: "user.manage",
+    roles: ["SUPER_ADMIN"],
+  },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    setUser(getStoredUser());
+  }, []);
+
+  const visibleNavItems = navItems.filter((item) => {
+    if (!item.roles && !item.permission) return true;
+    if (!user) return true; // SSR / initial render
+    if (user.roles?.includes("SUPER_ADMIN") || user.roles?.includes("SUPERADMIN")) return true;
+    if (item.permission && hasPermission(item.permission)) return true;
+    if (item.roles && item.roles.some((r) => user.roles?.includes(r))) return true;
+    return false;
+  });
 
   return (
     <Flex
@@ -63,7 +117,7 @@ export default function Sidebar() {
       </HStack>
 
       <VStack align="stretch" spacing={0.5} px={3} flex={1}>
-        {nav.map((item) => {
+        {visibleNavItems.map((item) => {
           const active = pathname === item.href || pathname?.startsWith(item.href + "/");
           const Icon = item.icon;
           return (
@@ -94,9 +148,10 @@ export default function Sidebar() {
       <Box px={5} pt={4} borderTop="1px solid" borderColor="line.900">
         <HStack spacing={2} color="ink.300">
           <LuShieldCheck size={14} />
-          <Text fontSize="11px">Offline-first sync tayyor</Text>
+          <Text fontSize="11px">RBAC & Offline sync faol</Text>
         </HStack>
       </Box>
     </Flex>
   );
 }
+
