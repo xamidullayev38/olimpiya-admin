@@ -13,31 +13,56 @@ import {
   Divider,
   PinInput,
   PinInputField,
+  useToast,
 } from "@chakra-ui/react";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { LuScanLine, LuLock, LuUserRound } from "react-icons/lu";
 import BadgeCard from "@/entities/Participant/ui/BadgeCard";
 import { participants, liveStats } from "@/shared/api/mock-data";
-import { login } from "@/lib/auth";
+import { loginWithApi } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const toast = useToast();
   const [mode, setMode] = useState<"password" | "pin">("password");
   const [username, setUsername] = useState("operator.tashkent");
+  const [password, setPassword] = useState("operator123");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (mode === "password" && username.trim() === "") {
+    if (mode === "password" && !username.trim()) {
       setError("Foydalanuvchi nomini kiriting");
       return;
     }
-    // TODO: backend tayyor bo'lganda shu yerni POST /api/auth/login ga ulang
-    login(username || "operator");
-    const from = searchParams?.get("from");
-    router.push(from && from !== "/login" ? from : "/dashboard");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await loginWithApi(username, password);
+      if (res.success) {
+        if (res.isMock) {
+          toast({
+            title: "Demo rejimda kirildi",
+            description: "Backend bilan aloqa o'rnatilmadi. Demo ma'lumotlar bilan ishlanmoqda.",
+            status: "warning",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+        const from = searchParams?.get("from");
+        router.push(from && from !== "/login" ? from : "/dashboard");
+      } else {
+        setError(res.error || "Login yoki parol noto'g'ri");
+      }
+    } catch (err: any) {
+      setError(err.message || "Tizimga kirishda xatolik yuz berdi");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -189,7 +214,11 @@ function LoginForm() {
                     placeholder="••••••••"
                     py={2.5}
                     color="ink.900"
-                    defaultValue="••••••••"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError(null);
+                    }}
                   />
                 </HStack>
               </FormControl>
@@ -200,7 +229,10 @@ function LoginForm() {
                 4 xonali PIN kodni kiriting
               </Text>
               <HStack>
-                <PinInput otp size="lg" placeholder="○">
+                <PinInput otp size="lg" placeholder="○" onComplete={(val) => {
+                  setUsername(`pin_${val}`);
+                  setPassword("pin1234");
+                }}>
                   <PinInputField bg="canvas.900" borderColor="line.800" color="ink.900" />
                   <PinInputField bg="canvas.900" borderColor="line.800" color="ink.900" />
                   <PinInputField bg="canvas.900" borderColor="line.800" color="ink.900" />
@@ -215,7 +247,7 @@ function LoginForm() {
               {error}
             </Text>
           )}
-          <Button type="submit" size="lg" w="full">
+          <Button type="submit" size="lg" w="full" isLoading={loading}>
             Kirish
           </Button>
 
@@ -236,4 +268,3 @@ export default function LoginPage() {
     </Suspense>
   );
 }
-

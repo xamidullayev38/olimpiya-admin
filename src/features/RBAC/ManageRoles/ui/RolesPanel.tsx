@@ -29,13 +29,17 @@ const permissionGroups = Array.from(new Set(permissionCatalog.map((p) => p.group
 
 export function RolesPanel() {
   const [roles, setRoles] = useState<SystemRole[]>(initialRoles);
-  const [selectedId, setSelectedId] = useState(roles[0].id);
+  const [selectedId, setSelectedId] = useState(initialRoles[0]?.id || "R-1");
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [newName, setNewName] = useState("");
   const [newPerms, setNewPerms] = useState<string[]>([]);
   const toast = useToast();
 
-  const selected = roles.find((r) => r.id === selectedId)!;
+  const selected = roles.find((r) => r.id === selectedId) || roles[0] || {
+    name: "Rol",
+    usersCount: 0,
+    permissions: [],
+  };
 
   function togglePermission(perm: string) {
     setRoles((prev) =>
@@ -161,7 +165,7 @@ export function RolesPanel() {
                     .map((p) => (
                       <Checkbox
                         key={p.key}
-                        isChecked={selected.permissions.includes(p.key)}
+                        isChecked={selected.permissions?.includes(p.key)}
                         onChange={() => togglePermission(p.key)}
                         colorScheme="yellow"
                         size="sm"
