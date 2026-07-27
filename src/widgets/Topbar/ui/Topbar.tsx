@@ -30,7 +30,12 @@ export default function Topbar({
     
     // Fetch latest user info from backend
     fetchCurrentUser().then((u) => {
-      if (u) setUser(u);
+      if (u) {
+        setUser(u);
+        if (u.mustChangePassword) {
+          onOpen();
+        }
+      }
     });
 
     return () => clearInterval(t);

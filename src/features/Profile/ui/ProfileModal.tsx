@@ -29,8 +29,9 @@ import {
 import { useState } from "react";
 import { LuUser, LuKey } from "react-icons/lu";
 import { UserProfile, getStoredUser } from "@/lib/auth";
-import { apiClient } from "@/shared/api/client";
+import { apiClient, storeAuthTokens, setCookie, SESSION_USER_KEY } from "@/shared/api/client";
 import { ENDPOINTS } from "@/shared/api/endpoints";
+import { Alert, AlertIcon } from "@chakra-ui/react";
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -99,13 +100,20 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
 
     setLoading(true);
     try {
-      await apiClient(ENDPOINTS.AUTH.CHANGE_PASSWORD, {
+      const res: any = await apiClient(ENDPOINTS.AUTH.CHANGE_PASSWORD, {
         method: "POST",
         body: JSON.stringify({
           currentPassword,
           newPassword,
         }),
       });
+
+      if (res && res.accessToken) {
+        storeAuthTokens(res.accessToken, res.refreshToken, res.user);
+      } else {
+        const updatedUser = { ...user, mustChangePassword: false };
+        setCookie(SESSION_USER_KEY, JSON.stringify(updatedUser), 7);
+      }
 
       toast({
         title: "Muvaffaqiyatli",
@@ -132,8 +140,10 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
     }
   }
 
+  const defaultTabIndex = user.mustChangePassword ? 1 : 0;
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="md">
+    <Modal isOpen={isOpen} onClose={user.mustChangePassword ? () => {} : onClose} isCentered size="md">
       <ModalOverlay backdropFilter="blur(6px)" bg="blackAlpha.700" />
       <ModalContent bg="canvas.800" border="1px solid" borderColor="line.900" color="ink.900">
         <ModalHeader borderBottom="1px solid" borderColor="line.900" py={4}>
@@ -142,10 +152,17 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
             <Text fontSize="17px" fontWeight="600">Shaxsiy Profil va Xavfsizlik</Text>
           </HStack>
         </ModalHeader>
-        <ModalCloseButton />
+        {!user.mustChangePassword && <ModalCloseButton />}
 
         <ModalBody py={5}>
-          <Tabs variant="soft-rounded" colorScheme="yellow">
+          {user.mustChangePassword && (
+            <Alert status="warning" borderRadius="lg" mb={4} bg="rgba(232, 162, 61, 0.15)" border="1px solid" borderColor="rgba(232, 162, 61, 0.3)" color="signal.amber">
+              <AlertIcon />
+              Xavfsizlik talabi: Birinchi kirishda vaqtinchalik parolingizni yangilashingiz shart!
+            </Alert>
+          )}
+
+          <Tabs variant="soft-rounded" colorScheme="yellow" defaultIndex={defaultTabIndex}>
             <TabList mb={4} bg="surface.800" p={1} borderRadius="lg">
               <Tab fontSize="13px" _selected={{ bg: "gold.400", color: "canvas.900" }}>
                 <HStack spacing={1.5}>
