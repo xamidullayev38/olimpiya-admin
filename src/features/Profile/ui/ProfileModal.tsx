@@ -26,7 +26,7 @@ import {
   Tab,
   TabPanel,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuUser, LuKey } from "react-icons/lu";
 import { UserProfile, getStoredUser } from "@/lib/auth";
 import { apiClient, storeAuthTokens, setCookie, SESSION_USER_KEY } from "@/shared/api/client";
@@ -47,6 +47,21 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    }
+  }, [isOpen]);
+
+  function handleCloseModal() {
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    onClose();
+  }
 
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
@@ -143,7 +158,7 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
   const defaultTabIndex = user.mustChangePassword ? 1 : 0;
 
   return (
-    <Modal isOpen={isOpen} onClose={user.mustChangePassword ? () => {} : onClose} isCentered size="md">
+    <Modal isOpen={isOpen} onClose={user.mustChangePassword ? () => {} : handleCloseModal} isCentered size="md">
       <ModalOverlay backdropFilter="blur(6px)" bg="blackAlpha.700" />
       <ModalContent bg="canvas.800" border="1px solid" borderColor="line.900" color="ink.900">
         <ModalHeader borderBottom="1px solid" borderColor="line.900" py={4}>
@@ -152,7 +167,7 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
             <Text fontSize="17px" fontWeight="600">Shaxsiy Profil va Xavfsizlik</Text>
           </HStack>
         </ModalHeader>
-        {!user.mustChangePassword && <ModalCloseButton />}
+        {!user.mustChangePassword && <ModalCloseButton onClick={handleCloseModal} />}
 
         <ModalBody py={5}>
           {user.mustChangePassword && (
@@ -293,7 +308,7 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
         </ModalBody>
 
         <ModalFooter borderTop="1px solid" borderColor="line.900" py={3}>
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" onClick={handleCloseModal}>
             Yopish
           </Button>
         </ModalFooter>
