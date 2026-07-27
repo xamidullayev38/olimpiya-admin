@@ -48,13 +48,17 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [tabIndex, setTabIndex] = useState(0);
+
   useEffect(() => {
     if (!isOpen) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+    } else {
+      setTabIndex(user.mustChangePassword ? 1 : 0);
     }
-  }, [isOpen]);
+  }, [isOpen, user.mustChangePassword]);
 
   function handleCloseModal() {
     setCurrentPassword("");
@@ -177,7 +181,7 @@ export function ProfileModal({ isOpen, onClose, user: propUser }: ProfileModalPr
             </Alert>
           )}
 
-          <Tabs variant="soft-rounded" colorScheme="yellow" defaultIndex={defaultTabIndex}>
+          <Tabs variant="soft-rounded" colorScheme="yellow" index={tabIndex} onChange={(i) => setTabIndex(i)}>
             <TabList mb={4} bg="surface.800" p={1} borderRadius="lg">
               <Tab fontSize="13px" _selected={{ bg: "gold.400", color: "canvas.900" }}>
                 <HStack spacing={1.5}>
