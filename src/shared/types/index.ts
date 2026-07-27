@@ -44,6 +44,7 @@ export interface Participant {
 export type ZoneKind = "kirish_chiqish" | "ochiq";
 
 export interface Zone {
+  id?: string;
   code: string;
   name: string;
   kind: ZoneKind;
@@ -128,4 +129,14 @@ export interface LiveStat {
   capacity?: number;
   inToday: number;
   outToday: number;
+}
+
+export interface ScannerDevice {
+  id: string;
+  name: string;
+  status: "faol" | "bekor_qilingan";
+  zoneId?: string;
+  zoneName?: string;
+  lastSeenAt?: string;
+  deviceKey?: string;
 }

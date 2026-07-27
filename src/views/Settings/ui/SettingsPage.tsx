@@ -10,11 +10,12 @@ import {
   TabPanels,
   TabPanel,
 } from "@chakra-ui/react";
-import { LuShieldCheck, LuUsers, LuTags, LuHistory } from "react-icons/lu";
+import { LuShieldCheck, LuUsers, LuTags, LuHistory, LuSmartphone } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
 import { RolesPanel } from "@/features/RBAC/ManageRoles/ui/RolesPanel";
 import { UsersPanel } from "@/features/RBAC/ManageUsers/ui/UsersPanel";
 import { AccreditationTypesPanel } from "@/features/RBAC/ManageAccreditationTypes/ui/AccreditationTypesPanel";
+import { DevicesPanel } from "@/features/RBAC/ManageDevices/ui/DevicesPanel";
 import { AuditLogPanel } from "@/features/RBAC/ViewAuditLog/ui/AuditLogPanel";
 
 export function SettingsPage() {
@@ -22,7 +23,7 @@ export function SettingsPage() {
     <Box>
       <Topbar
         title="Sozlamalar"
-        subtitle="Rollar, tizim foydalanuvchilari, akkreditatsiya turlari va audit log"
+        subtitle="Rollar, tizim foydalanuvchilari, akkreditatsiya turlari, skaner qurilmalari va audit log"
       />
       <Box px={8} py={6}>
         <Tabs variant="unstyled">
@@ -42,6 +43,7 @@ export function SettingsPage() {
               { label: "Rollar va ruxsatlar", icon: LuShieldCheck },
               { label: "Tizim foydalanuvchilari", icon: LuUsers },
               { label: "Akkreditatsiya turlari", icon: LuTags },
+              { label: "Skaner qurilmalari", icon: LuSmartphone },
               { label: "Audit log", icon: LuHistory },
             ].map(({ label, icon: Icon }) => (
               <Tab
@@ -70,6 +72,9 @@ export function SettingsPage() {
             </TabPanel>
             <TabPanel p={0}>
               <AccreditationTypesPanel />
+            </TabPanel>
+            <TabPanel p={0}>
+              <DevicesPanel />
             </TabPanel>
             <TabPanel p={0}>
               <AuditLogPanel />

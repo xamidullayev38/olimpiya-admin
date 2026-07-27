@@ -18,7 +18,10 @@ import Topbar from "@/widgets/Topbar/ui/Topbar";
 import StatCard from "@/shared/ui/StatCard/StatCard";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { LiveStat, AccessLogEntry } from "@/shared/types";
-import { fetchLiveStats, fetchAccessLogs } from "@/shared/api/services";
+import { fetchLiveStats, fetchDeniedAccessLogs } from "@/shared/api/services";
+import { io } from "socket.io-client";
+import { API_BASE_URL } from "@/shared/api/endpoints";
+import { getAccessToken } from "@/shared/api/client";
 
 const ACC_COLORS: Record<string, string> = {
   ATH: "#4C8DFF",
@@ -45,10 +48,10 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const { liveStats, totals } = await fetchLiveStats();
-        const logs = await fetchAccessLogs();
+        const deniedLogs = await fetchDeniedAccessLogs();
         setStats(liveStats);
         setTotals(totals);
-        setDenials(logs.filter((l) => l.result === "rad").slice(0, 6));
+        setDenials(deniedLogs.slice(0, 6));
       } catch {
         // silent catch
       } finally {
@@ -56,6 +59,38 @@ export default function DashboardPage() {
       }
     }
     loadData();
+
+    // WebSocket real-time ulanishi
+    const token = getAccessToken();
+    const wsUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, "");
+    const socket = io(`${wsUrl}/dashboard`, {
+      auth: { token },
+      query: { token },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.on("stats", (data: any) => {
+      if (data) {
+        const liveStats: LiveStat[] = (data.zoneOccupancy || []).map((z: any) => ({
+          zoneCode: z.zoneCode || z.code || "ZONE",
+          zoneName: z.zoneName || z.name || "Zona",
+          inside: z.currentOccupancy ?? 0,
+          inToday: z.inCount ?? z.currentOccupancy ?? 0,
+          outToday: z.outCount ?? 0,
+        }));
+        setStats(liveStats);
+        setTotals({
+          participants: data.totalParticipants || 0,
+          scansToday: data.totalScansToday || 0,
+          deniedToday: data.deniedToday || 0,
+          mealsToday: data.mealsServedToday || 0,
+        });
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const totalInside = stats.reduce((s, z) => s + z.inside, 0);

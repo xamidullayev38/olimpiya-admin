@@ -37,6 +37,7 @@ import {
   fetchAccreditationTypes,
   fetchZones,
   createAccreditationTypeApi,
+  setAccreditationTypeZonesApi,
 } from "@/shared/api/services";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
@@ -82,13 +83,25 @@ export function AccreditationTypesPanel() {
         color,
         mealAllowed,
       });
-      setTypes((prev) => [...prev, created]);
+
+      if (selectedZones.length > 0) {
+        const zoneIds = zones
+          .filter((z) => selectedZones.includes(z.code))
+          .map((z) => z.id)
+          .filter(Boolean) as string[];
+        if (zoneIds.length > 0) {
+          await setAccreditationTypeZonesApi(created.code, zoneIds);
+        }
+      }
+
+      const updatedTypes = await fetchAccreditationTypes();
+      setTypes(updatedTypes);
       setName("");
       setCode("");
       setSelectedZones([]);
       setMealAllowed(true);
       onClose();
-      toast({ title: "Akkreditatsiya turi saqlandi", status: "success", duration: 3000 });
+      toast({ title: "Akkreditatsiya turi va ruxsatlar saqlandi", status: "success", duration: 3000 });
     } catch (err: any) {
       toast({ title: "Saqlashda xatolik", description: err.message, status: "error", duration: 3000 });
     }

@@ -30,7 +30,7 @@ import {
 import { useEffect, useState } from "react";
 import { LuMapPin, LuScanLine, LuPlus } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
-import { fetchZones, fetchAccreditationTypes } from "@/shared/api/services";
+import { fetchZones, fetchAccreditationTypes, createZoneApi } from "@/shared/api/services";
 import { Zone, ZoneKind, AccreditationType } from "@/shared/types";
 
 export default function ZonesPage() {
@@ -72,7 +72,7 @@ export default function ZonesPage() {
     setCapacity("");
   }
 
-  function createZone() {
+  async function createZone() {
     if (name.trim() === "" || code.trim() === "") {
       toast({ title: "Nomi va kodi kiritilishi shart", status: "warning", duration: 2500 });
       return;
@@ -81,23 +81,26 @@ export default function ZonesPage() {
       toast({ title: "Bu kod bilan zona allaqachon mavjud", status: "error", duration: 2500 });
       return;
     }
-    const zone: Zone = {
-      code: code.trim().toUpperCase(),
-      name: name.trim(),
-      kind,
-      scanPoints: Math.max(1, parseInt(scanPoints || "1", 10)),
-      currentInside: 0,
-      capacity: capacity.trim() === "" ? undefined : parseInt(capacity, 10),
-    };
-    setZones((prev) => [...prev, zone]);
-    resetForm();
-    onClose();
-    toast({
-      title: "Yangi zona qo'shildi",
-      description: `${zone.name} (${zone.code})`,
-      status: "success",
-      duration: 3000,
-    });
+    try {
+      const zone = await createZoneApi({
+        name: name.trim(),
+        code: code.trim().toUpperCase(),
+        requiresAccessControl: kind === "kirish_chiqish",
+        description: capacity ? `Sig'imi: ${capacity}` : undefined,
+      });
+
+      setZones((prev) => [...prev, zone]);
+      resetForm();
+      onClose();
+      toast({
+        title: "Yangi zona qo'shildi",
+        description: `${zone.name} (${zone.code})`,
+        status: "success",
+        duration: 3000,
+      });
+    } catch (err: any) {
+      toast({ title: "Zona yaratishda xatolik", description: err.message, status: "error", duration: 3000 });
+    }
   }
 
   return (

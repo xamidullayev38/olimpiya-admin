@@ -67,4 +67,8 @@ export const ENDPOINTS = {
   AUDIT_LOGS: {
     BASE: "/audit-logs",
   },
+  DEVICES: {
+    BASE: "/devices",
+    REVOKE: (id: string) => `/devices/${id}/revoke`,
+  },
 };

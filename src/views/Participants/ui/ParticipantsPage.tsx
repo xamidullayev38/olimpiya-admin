@@ -29,6 +29,7 @@ import {
   blockParticipantApi,
   unblockParticipantApi,
   fetchAccreditationTypes,
+  fetchParticipantHistory,
 } from "@/shared/api/services";
 
 export function ParticipantsPage() {
@@ -40,11 +41,23 @@ export function ParticipantsPage() {
   const [selected, setSelected] = useState<Participant | null>(null);
   const [editing, setEditing] = useState<Participant | null>(null);
   const [printTarget, setPrintTarget] = useState<Participant | null>(null);
+  const [participantHistory, setParticipantHistory] = useState<any[]>([]);
 
   const historyDrawer = useDisclosure();
   const formModal = useDisclosure();
   const importModal = useDisclosure();
   const toast = useToast();
+
+  async function openHistory(p: Participant) {
+    setSelected(p);
+    historyDrawer.onOpen();
+    try {
+      const hData = await fetchParticipantHistory(p.id);
+      setParticipantHistory(hData);
+    } catch {
+      setParticipantHistory([]);
+    }
+  }
 
   async function loadData() {
     setLoading(true);
@@ -214,7 +227,7 @@ export function ParticipantsPage() {
             onPrint={() => printBadge(selected)}
             onEdit={() => openEdit(selected)}
             onToggleBlock={() => toggleBlock(selected)}
-            onOpenHistory={historyDrawer.onOpen}
+            onOpenHistory={() => openHistory(selected)}
           />
         )}
       </Flex>
@@ -230,7 +243,7 @@ export function ParticipantsPage() {
           isOpen={historyDrawer.isOpen}
           onClose={historyDrawer.onClose}
           participant={selected}
-          history={[]}
+          history={participantHistory}
         />
       )}
 

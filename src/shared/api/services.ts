@@ -155,6 +155,7 @@ export async function fetchZones(): Promise<Zone[]> {
     const data = await apiClient(ENDPOINTS.ZONES.BASE);
     if (Array.isArray(data)) {
       return data.map((z: any) => ({
+        id: z.id,
         code: z.code,
         name: z.name,
         kind: z.requiresAccessControl ? "kirish_chiqish" : "ochiq",
@@ -180,6 +181,7 @@ export async function createZoneApi(data: {
     body: JSON.stringify(data),
   });
   return {
+    id: z.id,
     code: z.code,
     name: z.name,
     kind: z.requiresAccessControl ? "kirish_chiqish" : "ochiq",
@@ -403,5 +405,107 @@ export async function fetchAuditLogs(params?: any): Promise<AuditLogEntry[]> {
     }));
   } catch (e) {
     return [];
+  }
+}
+
+export async function fetchParticipantHistory(id: string): Promise<any[]> {
+  try {
+    const data = await apiClient(ENDPOINTS.PARTICIPANTS.HISTORY(id));
+    const accessLogs = (data.accessLogs || []).map((l: any) => ({
+      id: l.id,
+      kind: "Zona",
+      label: l.zone?.name || l.zoneId,
+      result: l.result === "GRANTED" ? "ruxsat" : "rad",
+      reason: l.denyReason,
+      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+    }));
+    const mealLogs = (data.mealLogs || []).map((l: any) => ({
+      id: l.id,
+      kind: "Ovqatlanish",
+      label: l.mealSchedule?.mealType === "BREAKFAST" ? "Nonushta" : l.mealSchedule?.mealType === "LUNCH" ? "Tushlik" : "Kechki ovqat",
+      result: l.result === "GRANTED" ? "ruxsat" : "rad",
+      reason: l.denyReason,
+      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+    }));
+    return [...accessLogs, ...mealLogs].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function fetchDeniedAccessLogs(): Promise<AccessLogEntry[]> {
+  try {
+    const data = await apiClient(ENDPOINTS.ACCESS_LOGS.DENIED);
+    const list = Array.isArray(data) ? data : data?.data || [];
+    return list.map((l: any) => ({
+      id: l.id,
+      participantId: l.participantId || "",
+      participantName: l.participant ? `${l.participant.firstName} ${l.participant.lastName}` : "Noma'lum",
+      accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
+      zoneCode: l.zone?.code || "ZONE",
+      direction: l.direction || "IN",
+      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      result: "rad",
+      reason: l.denyReason,
+      device: l.deviceId || "SCN",
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+export async function setAccreditationTypeZonesApi(id: string, zoneIds: string[]): Promise<boolean> {
+  try {
+    await apiClient(ENDPOINTS.ACCREDITATION_TYPES.ZONES(id), {
+      method: "POST",
+      body: JSON.stringify({ zoneIds }),
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function fetchDevices(): Promise<any[]> {
+  try {
+    const data = await apiClient(ENDPOINTS.DEVICES.BASE);
+    if (Array.isArray(data)) {
+      return data.map((d: any) => ({
+        id: d.id,
+        name: d.name,
+        status: d.status === "ACTIVE" ? "faol" : "bekor_qilingan",
+        zoneId: d.currentZoneId,
+        zoneName: d.currentZone?.name || "—",
+        lastSeenAt: d.lastSeenAt ? d.lastSeenAt.replace("T", " ").slice(0, 19) : "—",
+      }));
+    }
+  } catch (e) {
+    // error
+  }
+  return [];
+}
+
+export async function createDeviceApi(data: { name: string; zoneId?: string }): Promise<any> {
+  const d = await apiClient(ENDPOINTS.DEVICES.BASE, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+  return {
+    id: d.device?.id || d.id,
+    name: d.device?.name || data.name,
+    status: "faol",
+    zoneId: data.zoneId,
+    deviceKey: d.rawDeviceKey || d.deviceKey,
+  };
+}
+
+export async function revokeDeviceApi(id: string): Promise<boolean> {
+  try {
+    await apiClient(ENDPOINTS.DEVICES.REVOKE(id), { method: "POST" });
+    return true;
+  } catch (e) {
+    return false;
   }
 }

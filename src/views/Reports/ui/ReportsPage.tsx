@@ -88,6 +88,28 @@ export default function ReportsPage() {
     }
   }
 
+  async function handleExportPdf() {
+    try {
+      const token = getAccessToken();
+      const res = await fetch(`${API_BASE_URL}/access-logs/export/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "access-logs.pdf";
+        a.click();
+        toast({ title: "PDF hisoboti yuklab olindi", status: "success", duration: 3000 });
+      } else {
+        toast({ title: "Hisobot yaratishda xatolik", status: "error", duration: 3000 });
+      }
+    } catch {
+      toast({ title: "Backend server bilan aloqa chiqmadi", status: "warning", duration: 3000 });
+    }
+  }
+
   return (
     <Box>
       <Topbar title="Hisobotlar" subtitle="Kirish, ovqatlanish va rad etishlar bo'yicha eksport" />
@@ -96,8 +118,8 @@ export default function ReportsPage() {
           <Button leftIcon={<LuFileSpreadsheet size={15} />} variant="outline" onClick={handleExportExcel}>
             Excel eksport
           </Button>
-          <Button leftIcon={<LuFileText size={15} />} variant="outline" onClick={() => window.print()}>
-            Chop etish / PDF
+          <Button leftIcon={<LuFileText size={15} />} variant="outline" onClick={handleExportPdf}>
+            PDF eksport
           </Button>
         </Flex>
 
