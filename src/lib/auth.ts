@@ -1,4 +1,4 @@
-import { apiClient, storeAuthTokens, clearAuthTokens, getCookie, setCookie, SESSION_USER_KEY, ACCESS_TOKEN_KEY } from "@/shared/api/client";
+import { apiClient, storeAuthTokens, clearAuthTokens, getCookie, setCookie, getAccessToken, SESSION_USER_KEY, ACCESS_TOKEN_KEY } from "@/shared/api/client";
 import { ENDPOINTS } from "@/shared/api/endpoints";
 
 export const AUTH_COOKIE = "qr_badge_session";
@@ -135,6 +135,10 @@ export function hasRole(...roleNames: string[]): boolean {
 }
 
 export async function fetchCurrentUser(): Promise<UserProfile | null> {
+  const token = getAccessToken();
+  if (!token) {
+    return getStoredUser();
+  }
   try {
     const user = await apiClient<UserProfile>(ENDPOINTS.AUTH.ME);
     if (user) {
