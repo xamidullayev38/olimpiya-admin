@@ -15,7 +15,8 @@ export default function Topbar({
   subtitle?: string;
 }) {
   const [now, setNow] = useState<Date | null>(null);
-  const [user, setUser] = useState<UserProfile>(getStoredUser());
+  const [user, setUser] = useState<UserProfile>({ username: "admin", fullName: "Administrator", roles: ["SUPER_ADMIN"] });
+  const [mounted, setMounted] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const router = useRouter();
 
@@ -25,6 +26,8 @@ export default function Topbar({
   }
 
   useEffect(() => {
+    setMounted(true);
+    setUser(getStoredUser());
     setNow(new Date());
     const t = setInterval(() => setNow(new Date()), 1000);
     
