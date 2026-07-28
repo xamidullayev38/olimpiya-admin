@@ -257,10 +257,7 @@ export function ParticipantsPage() {
       <ImportModal
         isOpen={importModal.isOpen}
         onClose={importModal.onClose}
-        onImport={() => {
-          loadData();
-          importModal.onClose();
-        }}
+        onImportSuccess={loadData}
       />
     </Box>
   );

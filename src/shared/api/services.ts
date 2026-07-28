@@ -1,5 +1,5 @@
-import { apiClient } from "./client";
-import { ENDPOINTS } from "./endpoints";
+import { apiClient, getAccessToken } from "./client";
+import { ENDPOINTS, API_BASE_URL } from "./endpoints";
 import {
   Participant,
   Zone,
@@ -121,6 +121,25 @@ export async function createParticipantApi(data: {
     qrToken: res.qrTokenId || `qr_${res.id}`,
     createdAt: new Date().toISOString().split("T")[0],
   };
+}
+
+export async function importParticipantsApi(file: File): Promise<any> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const token = getAccessToken();
+  const res = await fetch(`${API_BASE_URL}${ENDPOINTS.PARTICIPANTS.IMPORT}`, {
+    method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.message || "Faylni import qilishda xatolik yuz berdi");
+  }
+
+  return res.json();
 }
 
 export async function blockParticipantApi(id: string): Promise<boolean> {
