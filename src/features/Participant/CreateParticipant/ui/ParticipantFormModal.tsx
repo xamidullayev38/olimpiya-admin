@@ -53,7 +53,7 @@ export function ParticipantFormModal({
   }, [isOpen]);
 
   const lastInitialId = useRef<string | null>(null);
-  if (isOpen && initial?.id !== lastInitialId.current) {
+  if (isOpen && (initial?.id ?? null) !== lastInitialId.current) {
     lastInitialId.current = initial?.id ?? null;
     if (initial) {
       setFullName(initial.fullName);
