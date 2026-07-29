@@ -26,10 +26,11 @@ import {
   Select,
   Spinner,
   useToast,
+  IconButton,
 } from "@chakra-ui/react";
-import { LuPlus } from "react-icons/lu";
+import { LuPlus, LuTrash } from "react-icons/lu";
 import { SystemUser } from "@/shared/types";
-import { fetchUsers, fetchRoles, createUserApi } from "@/shared/api/services";
+import { fetchUsers, fetchRoles, createUserApi, deleteUserApi } from "@/shared/api/services";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
 export function UsersPanel() {
@@ -85,6 +86,22 @@ export function UsersPanel() {
     }
   }
 
+  async function handleDeleteUser(id: string, fullName: string) {
+    if (!window.confirm(`Rostdan ham ${fullName} (hodim) ni o'chirmoqchimisiz?`)) return;
+    try {
+      await deleteUserApi(id);
+      setUsers(prev => prev.filter(x => x.id !== id));
+      toast({ title: "Xodim o'chirildi", status: "success", duration: 2500 });
+    } catch (err: any) {
+      toast({
+        title: "O'chirishda xatolik",
+        description: err.message || "Ushbu xodimga tegishli ma'lumotlar mavjud.",
+        status: "error",
+        duration: 4000,
+      });
+    }
+  }
+
   return (
     <>
       <Flex justify="flex-end" mb={4}>
@@ -106,6 +123,7 @@ export function UsersPanel() {
                 <Th>Rol(lar)</Th>
                 <Th>Holati</Th>
                 <Th>Oxirgi faollik</Th>
+                <Th isNumeric>Amal</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -139,6 +157,16 @@ export function UsersPanel() {
                   </Td>
                   <Td fontFamily="mono" fontSize="12px" color="ink.500">
                     {u.lastActive}
+                  </Td>
+                  <Td isNumeric>
+                    <IconButton
+                      aria-label="O'chirish"
+                      icon={<LuTrash size={14} />}
+                      size="xs"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={() => handleDeleteUser(u.id, u.fullName)}
+                    />
                   </Td>
                 </Tr>
               ))}

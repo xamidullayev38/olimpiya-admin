@@ -30,6 +30,7 @@ import {
   importParticipantsApi,
   blockParticipantApi,
   unblockParticipantApi,
+  deleteParticipantApi,
   fetchAccreditationTypes,
   fetchParticipantHistory,
 } from "@/shared/api/services";
@@ -171,6 +172,23 @@ export function ParticipantsPage() {
     });
   }
 
+  async function handleDelete(p: Participant) {
+    if (!window.confirm("Rostdan ham ushbu ishtirokchini o'chirmoqchimisiz?")) return;
+    try {
+      await deleteParticipantApi(p.id);
+      setList(prev => prev.filter(x => x.id !== p.id));
+      if (selected?.id === p.id) setSelected(null);
+      toast({ title: "Ishtirokchi o'chirildi", status: "success", duration: 2500 });
+    } catch (err: any) {
+      toast({
+        title: "O'chirishda xatolik",
+        description: err.message || "Tarixiy ma'lumotlar borligi sababli o'chirib bo'lmaydi.",
+        status: "error",
+        duration: 4000,
+      });
+    }
+  }
+
   async function handleBulkAction(ids: string[], action: "block" | "unblock") {
     try {
       const promises = ids.map(id => 
@@ -261,6 +279,7 @@ export function ParticipantsPage() {
               onEdit={openEdit}
               onToggleBlock={toggleBlock}
               onPrint={printBadge}
+              onDelete={handleDelete}
               onBulkAction={handleBulkAction}
             />
           )}

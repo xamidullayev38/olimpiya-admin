@@ -22,14 +22,15 @@ import {
   Spinner,
   useToast,
 } from "@chakra-ui/react";
-import { LuPlus } from "react-icons/lu";
-import { SystemRole, Permission } from "@/shared/types";
 import {
   fetchRoles,
   fetchPermissions,
   createRoleApi,
   assignRolePermissionsApi,
+  deleteRoleApi,
 } from "@/shared/api/services";
+import { SystemRole, Permission } from "@/shared/types";
+import { LuTrash, LuPlus } from "react-icons/lu";
 
 export function RolesPanel() {
   const [roles, setRoles] = useState<SystemRole[]>([]);
@@ -111,6 +112,29 @@ export function RolesPanel() {
     }
   }
 
+  async function deleteSelectedRole() {
+    if (!selected.id || selected.builtIn) return;
+    if (!window.confirm(`Rostdan ham "${selected.name}" rolini o'chirmoqchimisiz?`)) return;
+    
+    try {
+      await deleteRoleApi(selected.id);
+      setRoles(prev => {
+        const next = prev.filter(r => r.id !== selected.id);
+        if (next.length > 0) setSelectedId(next[0].id);
+        else setSelectedId("");
+        return next;
+      });
+      toast({ title: "Rol o'chirildi", status: "success", duration: 2500 });
+    } catch (err: any) {
+      toast({
+        title: "O'chirishda xatolik",
+        description: err.message || "Tizimda xatolik",
+        status: "error",
+        duration: 4000,
+      });
+    }
+  }
+
   return (
     <>
       <Flex justify="flex-end" mb={4}>
@@ -180,10 +204,17 @@ export function RolesPanel() {
             p={5}
             className="glass-panel"
           >
-            <Flex justify="space-between" mb={1}>
-              <Text fontFamily="heading" fontWeight="600" fontSize="16px" color="ink.900">
-                {selected.name}
-              </Text>
+            <Flex justify="space-between" mb={1} align="center">
+              <HStack>
+                <Text fontFamily="heading" fontWeight="600" fontSize="16px" color="ink.900">
+                  {selected.name}
+                </Text>
+                {!selected.builtIn && (
+                  <Button size="xs" variant="ghost" colorScheme="red" leftIcon={<LuTrash />} onClick={deleteSelectedRole}>
+                    O'chirish
+                  </Button>
+                )}
+              </HStack>
               <Text fontSize="12px" color="ink.500">
                 {selected.usersCount} ta xodim ushbu rolga ega
               </Text>

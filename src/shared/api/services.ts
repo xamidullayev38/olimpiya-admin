@@ -562,3 +562,23 @@ export async function revokeDeviceApi(id: string): Promise<boolean> {
     return false;
   }
 }
+
+export async function deleteParticipantApi(id: string): Promise<boolean> {
+  await apiClient(`${ENDPOINTS.PARTICIPANTS.BASE}/${id}`, { method: "DELETE" });
+  return true;
+}
+
+export async function deleteZoneApi(id: string): Promise<boolean> {
+  await apiClient(`${ENDPOINTS.ZONES.BASE}/${id}`, { method: "DELETE" });
+  return true;
+}
+
+export async function deleteRoleApi(id: string): Promise<boolean> {
+  await apiClient(`${ENDPOINTS.ROLES.BASE}/${id}`, { method: "DELETE" });
+  return true;
+}
+
+export async function deleteUserApi(id: string): Promise<boolean> {
+  await apiClient(`${ENDPOINTS.USERS.BASE}/${id}`, { method: "DELETE" });
+  return true;
+}

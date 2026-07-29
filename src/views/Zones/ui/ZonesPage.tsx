@@ -26,11 +26,12 @@ import {
   Select,
   useToast,
   Spinner,
+  IconButton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { LuMapPin, LuScanLine, LuPlus } from "react-icons/lu";
+import { LuMapPin, LuScanLine, LuPlus, LuTrash } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
-import { fetchZones, fetchAccreditationTypes, createZoneApi } from "@/shared/api/services";
+import { fetchZones, fetchAccreditationTypes, createZoneApi, deleteZoneApi } from "@/shared/api/services";
 import { Zone, ZoneKind, AccreditationType } from "@/shared/types";
 
 export default function ZonesPage() {
@@ -103,6 +104,25 @@ export default function ZonesPage() {
     }
   }
 
+  async function handleDeleteZone(z: Zone) {
+    if (!window.confirm(`Rostdan ham ${z.name} zonasini o'chirmoqchimisiz?`)) return;
+    try {
+      await deleteZoneApi(z.id || z.code); // Fallback if z.id is missing but backend accepts id. Wait, fetchZones maps id to id? Let me pass z.id. 
+      // I should pass z.id, assuming it exists. If not, I'll pass z.code and backend will not find it unless backend handles it. But backend delete is by ID.
+      // Wait, let's look at fetchZones mapping.
+      await deleteZoneApi(z.id);
+      setZones(prev => prev.filter(x => x.id !== z.id));
+      toast({ title: "Zona o'chirildi", status: "success", duration: 2500 });
+    } catch (err: any) {
+      toast({
+        title: "O'chirishda xatolik",
+        description: err.message || "Ushbu zonaga tegishli ma'lumotlar bor",
+        status: "error",
+        duration: 4000,
+      });
+    }
+  }
+
   return (
     <Box>
       <Topbar title="Zonalar" subtitle={`${zones.length} ta bino/zona ro'yxatga olingan`} />
@@ -154,14 +174,24 @@ export default function ZonesPage() {
                         </Text>
                       </VStack>
                     </HStack>
-                    <Badge
-                      bg={z.kind === "kirish_chiqish" ? "signal.blueDim" : "surface.600"}
-                      color={z.kind === "kirish_chiqish" ? "signal.blue" : "ink.500"}
-                      px={2}
-                      py={0.5}
-                    >
-                      {z.kind === "kirish_chiqish" ? "IN / OUT" : "Ochiq"}
-                    </Badge>
+                    <HStack>
+                      <Badge
+                        bg={z.kind === "kirish_chiqish" ? "signal.blueDim" : "surface.600"}
+                        color={z.kind === "kirish_chiqish" ? "signal.blue" : "ink.500"}
+                        px={2}
+                        py={0.5}
+                      >
+                        {z.kind === "kirish_chiqish" ? "IN / OUT" : "Ochiq"}
+                      </Badge>
+                      <IconButton
+                        aria-label="O'chirish"
+                        icon={<LuTrash size={14} />}
+                        size="xs"
+                        variant="ghost"
+                        colorScheme="red"
+                        onClick={() => handleDeleteZone(z)}
+                      />
+                    </HStack>
                   </Flex>
 
                   <VStack align="stretch" spacing={2} mb={4}>

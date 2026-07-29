@@ -23,6 +23,7 @@ import {
   LuPencil,
   LuBan,
   LuCircleCheck,
+  LuTrash,
 } from "react-icons/lu";
 import { useState } from "react";
 import { Participant, BadgeStatus } from "@/shared/types";
@@ -51,6 +52,7 @@ export function ParticipantTable({
   onEdit,
   onToggleBlock,
   onPrint,
+  onDelete,
   onBulkAction,
 }: {
   participants: Participant[];
@@ -59,6 +61,7 @@ export function ParticipantTable({
   onEdit: (p: Participant) => void;
   onToggleBlock: (p: Participant) => void;
   onPrint: (p: Participant) => void;
+  onDelete?: (p: Participant) => void;
   onBulkAction?: (ids: string[], action: "block" | "unblock") => void;
 }) {
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
@@ -190,6 +193,17 @@ export function ParticipantTable({
                       >
                         {p.badgeStatus === "bloklangan" ? "Blokdan chiqarish" : "Bloklash"}
                       </MenuItem>
+                      {onDelete && (
+                        <MenuItem
+                          icon={<LuTrash size={14} />}
+                          bg="transparent"
+                          _hover={{ bg: "surface.600" }}
+                          color="red.400"
+                          onClick={() => onDelete(p)}
+                        >
+                          O'chirish
+                        </MenuItem>
+                      )}
                     </MenuList>
                   </Menu>
                 </Td>
