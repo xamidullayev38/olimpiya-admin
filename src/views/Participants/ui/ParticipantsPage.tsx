@@ -116,7 +116,7 @@ export function ParticipantsPage() {
 
       const dataToSave = {
         firstName: nameParts[0] || fields.fullName,
-        lastName: nameParts.slice(1).join(" ") || "—",
+        lastName: nameParts.slice(1).join(" ") || " ",
         pinfl: fields.pinfl,
         documentNumber: fields.docNumber,
         phone: fields.phone,
