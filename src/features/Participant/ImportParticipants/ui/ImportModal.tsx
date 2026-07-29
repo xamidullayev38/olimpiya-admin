@@ -110,11 +110,12 @@ export function ImportModal({
       const res = await importParticipantsApi(file);
       const successCount = res.successCount ?? 0;
       const errorCount = res.errorCount ?? 0;
+      const firstError = errorCount > 0 && res.results ? res.results.find((r: any) => r.status === 'error')?.message : '';
       toast({
         title: errorCount === 0 ? "Import muvaffaqiyatli yakunlandi!" : "Import yakunlandi (xatolar bilan)",
         description: errorCount === 0
           ? `${successCount} ta ishtirokchi muvaffaqiyatli import qilindi.`
-          : `${successCount} ta muvaffaqiyatli, ${errorCount} ta xato.`,
+          : `${successCount} ta muvaffaqiyatli, ${errorCount} ta xato. ${firstError ? 'Sabab: ' + firstError : ''}`,
         status: errorCount === 0 ? "success" : "warning",
         duration: 5000,
         isClosable: true,
