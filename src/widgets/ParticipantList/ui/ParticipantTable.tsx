@@ -14,6 +14,8 @@ import {
   MenuItem,
   Button,
   Flex,
+  Checkbox,
+  HStack,
 } from "@chakra-ui/react";
 import {
   LuChevronDown,
@@ -22,6 +24,7 @@ import {
   LuBan,
   LuCircleCheck,
 } from "react-icons/lu";
+import { useState } from "react";
 import { Participant, BadgeStatus } from "@/shared/types";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 
@@ -48,6 +51,7 @@ export function ParticipantTable({
   onEdit,
   onToggleBlock,
   onPrint,
+  onBulkAction,
 }: {
   participants: Participant[];
   selectedId: string;
@@ -55,12 +59,63 @@ export function ParticipantTable({
   onEdit: (p: Participant) => void;
   onToggleBlock: (p: Participant) => void;
   onPrint: (p: Participant) => void;
+  onBulkAction?: (ids: string[], action: "block" | "unblock") => void;
 }) {
+  const [checkedIds, setCheckedIds] = useState<string[]>([]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      setCheckedIds(participants.map(p => p.id));
+    } else {
+      setCheckedIds([]);
+    }
+  };
+
+  const handleSelectOne = (id: string, checked: boolean) => {
+    if (checked) {
+      setCheckedIds(prev => [...prev, id]);
+    } else {
+      setCheckedIds(prev => prev.filter(x => x !== id));
+    }
+  };
+
+  const allChecked = participants.length > 0 && checkedIds.length === participants.length;
+  const isIndeterminate = checkedIds.length > 0 && checkedIds.length < participants.length;
+
   return (
     <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="xl" overflow="hidden" className="glass-panel" style={{ background: "rgba(27, 32, 40, 0.4)" }}>
+      {checkedIds.length > 0 && onBulkAction && (
+        <Flex px={4} py={3} bg="surface.700" borderBottom="1px solid" borderColor="line.900" align="center" justify="space-between">
+          <Text fontSize="13px" color="ink.300">
+            <Text as="span" color="white" fontWeight="600">{checkedIds.length}</Text> ta ishtirokchi tanlandi
+          </Text>
+          <HStack spacing={3}>
+            <Button size="xs" colorScheme="red" variant="outline" leftIcon={<LuBan />} onClick={() => {
+              onBulkAction(checkedIds, "block");
+              setCheckedIds([]);
+            }}>
+              Bloklash
+            </Button>
+            <Button size="xs" colorScheme="green" variant="outline" leftIcon={<LuCircleCheck />} onClick={() => {
+              onBulkAction(checkedIds, "unblock");
+              setCheckedIds([]);
+            }}>
+              Faollashtirish
+            </Button>
+          </HStack>
+        </Flex>
+      )}
       <Table size="sm">
         <Thead>
           <Tr>
+            <Th w="40px" px={4}>
+              <Checkbox 
+                isChecked={allChecked} 
+                isIndeterminate={isIndeterminate} 
+                onChange={handleSelectAll} 
+                colorScheme="gold" 
+              />
+            </Th>
             <Th>F.I.Sh</Th>
             <Th>Akkreditatsiya</Th>
             <Th>Tashkilot</Th>
@@ -74,14 +129,22 @@ export function ParticipantTable({
             const acc = ACC_COLORS[p.accreditation] || { color: "#2563eb", name: p.accreditation || "Ishtirokchi" };
             const st = statusTone[p.badgeStatus] || { label: "Faol", tone: "success" };
             const active = selectedId === p.id;
+            const isChecked = checkedIds.includes(p.id);
             return (
               <Tr
                 key={p.id}
                 cursor="pointer"
-                bg={active ? "surface.700" : "transparent"}
+                bg={active || isChecked ? "surface.700" : "transparent"}
                 _hover={{ bg: "surface.700" }}
                 onClick={() => onSelect(p)}
               >
+                <Td px={4} onClick={(e) => e.stopPropagation()}>
+                  <Checkbox 
+                    isChecked={isChecked} 
+                    onChange={(e) => handleSelectOne(p.id, e.target.checked)} 
+                    colorScheme="gold" 
+                  />
+                </Td>
                 <Td>
                   <Text fontWeight="600" color="ink.900">
                     {p.fullName}

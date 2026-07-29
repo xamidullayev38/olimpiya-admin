@@ -171,6 +171,34 @@ export function ParticipantsPage() {
     });
   }
 
+  async function handleBulkAction(ids: string[], action: "block" | "unblock") {
+    try {
+      const promises = ids.map(id => 
+        action === "block" ? blockParticipantApi(id) : unblockParticipantApi(id)
+      );
+      await Promise.all(promises);
+      const nextStatus: BadgeStatus = action === "block" ? "bloklangan" : "faol";
+      
+      setList(prev => prev.map(x => ids.includes(x.id) ? { ...x, badgeStatus: nextStatus } : x));
+      if (selected && ids.includes(selected.id)) {
+        setSelected({ ...selected, badgeStatus: nextStatus });
+      }
+
+      toast({
+        title: action === "block" ? `${ids.length} ta badge bloklandi` : `${ids.length} ta badge faollashtirildi`,
+        status: action === "block" ? "warning" : "success",
+        duration: 3000,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Xatolik yuz berdi",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+      });
+    }
+  }
+
   function printBadge(p: Participant) {
     setPrintTarget(p);
     requestAnimationFrame(() => {
@@ -233,6 +261,7 @@ export function ParticipantsPage() {
               onEdit={openEdit}
               onToggleBlock={toggleBlock}
               onPrint={printBadge}
+              onBulkAction={handleBulkAction}
             />
           )}
         </Box>
