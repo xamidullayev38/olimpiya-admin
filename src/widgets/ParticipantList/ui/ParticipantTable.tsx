@@ -62,7 +62,7 @@ export function ParticipantTable({
   onToggleBlock: (p: Participant) => void;
   onPrint: (p: Participant) => void;
   onDelete?: (p: Participant) => void;
-  onBulkAction?: (ids: string[], action: "block" | "unblock") => void;
+  onBulkAction?: (ids: string[], action: "block" | "unblock" | "delete") => void;
 }) {
   const [checkedIds, setCheckedIds] = useState<string[]>([]);
 
@@ -104,6 +104,12 @@ export function ParticipantTable({
               setCheckedIds([]);
             }}>
               Faollashtirish
+            </Button>
+            <Button size="xs" colorScheme="red" variant="solid" leftIcon={<LuTrash />} onClick={() => {
+              onBulkAction(checkedIds, "delete");
+              setCheckedIds([]);
+            }}>
+              O'chirish
             </Button>
           </HStack>
         </Flex>

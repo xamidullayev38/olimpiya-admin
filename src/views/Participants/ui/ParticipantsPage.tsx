@@ -189,8 +189,18 @@ export function ParticipantsPage() {
     }
   }
 
-  async function handleBulkAction(ids: string[], action: "block" | "unblock") {
+  async function handleBulkAction(ids: string[], action: "block" | "unblock" | "delete") {
     try {
+      if (action === "delete") {
+        if (!window.confirm(`Rostdan ham tanlangan ${ids.length} ta ishtirokchini o'chirmoqchimisiz?`)) return;
+        const promises = ids.map(id => deleteParticipantApi(id));
+        await Promise.all(promises);
+        setList(prev => prev.filter(x => !ids.includes(x.id)));
+        if (selected && ids.includes(selected.id)) setSelected(null);
+        toast({ title: `${ids.length} ta ishtirokchi o'chirildi`, status: "success", duration: 3000 });
+        return;
+      }
+
       const promises = ids.map(id => 
         action === "block" ? blockParticipantApi(id) : unblockParticipantApi(id)
       );
