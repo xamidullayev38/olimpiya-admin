@@ -64,6 +64,7 @@ export default function DashboardPage() {
     const token = getAccessToken();
     const wsUrl = API_BASE_URL.replace(/\/api\/v1\/?$/, "");
     const socket = io(`${wsUrl}/dashboard`, {
+      path: "/api/v1/socket.io",
       auth: { token },
       query: { token },
       transports: ["websocket", "polling"],
