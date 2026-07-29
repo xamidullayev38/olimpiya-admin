@@ -123,6 +123,38 @@ export async function createParticipantApi(data: {
   };
 }
 
+export async function updateParticipantApi(id: string, data: Partial<{
+  firstName: string;
+  lastName: string;
+  middleName: string;
+  pinfl: string;
+  documentNumber: string;
+  phone: string;
+  organization: string;
+  sportType: string;
+  accreditationTypeId: string;
+}>): Promise<Participant> {
+  const res = await apiClient(`${ENDPOINTS.PARTICIPANTS.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  return {
+    id: res.id,
+    fullName: `${res.firstName} ${res.lastName}` + (res.middleName ? ` ${res.middleName}` : ""),
+    pinfl: res.pinflLast4 || data.pinfl || "—",
+    birthDate: res.birthDate ? res.birthDate.split("T")[0] : "2000-01-01",
+    docNumber: res.documentNumber || data.documentNumber || "—",
+    phone: res.phone || data.phone || "—",
+    accreditation: (res.accreditationType?.code || "ATH") as AccreditationCode,
+    sport: res.sportType || data.sportType,
+    organization: res.organization || data.organization || "—",
+    badgeStatus: mapBadgeStatus(res.badgeStatus),
+    badgeId: `BADGE-${res.id.slice(0, 6).toUpperCase()}`,
+    qrToken: res.qrTokenId || `qr_${res.id}`,
+    createdAt: new Date().toISOString().split("T")[0],
+  };
+}
+
 export async function importParticipantsApi(file: File): Promise<any> {
   const formData = new FormData();
   formData.append("file", file);

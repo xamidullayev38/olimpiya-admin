@@ -26,6 +26,8 @@ import { Participant, BadgeStatus } from "@/shared/types";
 import {
   fetchParticipants,
   createParticipantApi,
+  updateParticipantApi,
+  importParticipantsApi,
   blockParticipantApi,
   unblockParticipantApi,
   fetchAccreditationTypes,
@@ -110,7 +112,7 @@ export function ParticipantsPage() {
 
     try {
       const nameParts = fields.fullName.trim().split(" ");
-      const newP = await createParticipantApi({
+      const dataToSave = {
         firstName: nameParts[0] || fields.fullName,
         lastName: nameParts.slice(1).join(" ") || "—",
         pinfl: fields.pinfl,
@@ -119,15 +121,27 @@ export function ParticipantsPage() {
         organization: fields.organization,
         sportType: fields.sport,
         accreditationTypeId: fields.accreditation,
-      });
+      };
 
-      setList((prev) => [newP, ...prev]);
-      setSelected(newP);
-      toast({
-        title: "Ishtirokchi muvaffaqiyatli saqlandi",
-        status: "success",
-        duration: 3000,
-      });
+      if (editing) {
+        const updatedP = await updateParticipantApi(editing.id, dataToSave);
+        setList((prev) => prev.map((x) => (x.id === editing.id ? updatedP : x)));
+        if (selected?.id === editing.id) setSelected(updatedP);
+        toast({
+          title: "Ishtirokchi muvaffaqiyatli yangilandi",
+          status: "success",
+          duration: 3000,
+        });
+      } else {
+        const newP = await createParticipantApi(dataToSave);
+        setList((prev) => [newP, ...prev]);
+        setSelected(newP);
+        toast({
+          title: "Ishtirokchi muvaffaqiyatli saqlandi",
+          status: "success",
+          duration: 3000,
+        });
+      }
       formModal.onClose();
     } catch (err: any) {
       toast({
