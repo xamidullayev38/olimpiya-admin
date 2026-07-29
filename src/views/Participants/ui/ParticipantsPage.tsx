@@ -112,6 +112,8 @@ export function ParticipantsPage() {
 
     try {
       const nameParts = fields.fullName.trim().split(" ");
+      const accId = accTypes.find((a) => a.code === fields.accreditation)?.id || fields.accreditation;
+
       const dataToSave = {
         firstName: nameParts[0] || fields.fullName,
         lastName: nameParts.slice(1).join(" ") || "—",
@@ -120,7 +122,7 @@ export function ParticipantsPage() {
         phone: fields.phone,
         organization: fields.organization,
         sportType: fields.sport,
-        accreditationTypeId: fields.accreditation,
+        accreditationTypeId: accId,
       };
 
       if (editing) {

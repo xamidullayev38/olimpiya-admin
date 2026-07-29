@@ -106,7 +106,7 @@ export function ParticipantFormModal({
                 <Select variant="outline" value={accreditation} onChange={(e) => setAccreditation(e.target.value)}>
                   {types.length > 0 ? (
                     types.map((a) => (
-                      <option key={a.id} value={a.id} style={{ background: "#12151B" }}>{a.name}</option>
+                      <option key={a.id} value={a.code} style={{ background: "#12151B" }}>{a.name}</option>
                     ))
                   ) : (
                     <option value="" style={{ background: "#12151B" }}>Yuklanmoqda...</option>

@@ -436,7 +436,7 @@ export async function assignRolePermissionsApi(roleId: string, permissionIds: st
   try {
     await apiClient(ENDPOINTS.ROLES.PERMISSIONS_BY_ID(roleId), {
       method: "POST",
-      body: JSON.stringify({ permissionIds }),
+      body: JSON.stringify({ permissionCodes: permissionIds }),
     });
     return true;
   } catch (e) {
