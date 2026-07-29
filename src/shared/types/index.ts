@@ -17,6 +17,7 @@ export type AccreditationCode =
   | "VIP";
 
 export interface AccreditationType {
+  id: string;
   code: AccreditationCode;
   name: string;
   color: string; // hex, used as the badge stripe color
@@ -28,13 +29,13 @@ export interface Participant {
   id: string;
   fullName: string;
   photoUrl?: string;
-  pinfl: string;
-  birthDate: string;
+  pinfl?: string;
+  birthDate?: string;
   docNumber: string;
-  phone: string;
+  phone?: string;
   accreditation: AccreditationCode;
   sport?: string;
-  organization: string;
+  organization?: string;
   badgeStatus: BadgeStatus;
   badgeId: string;
   qrToken: string;

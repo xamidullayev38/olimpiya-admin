@@ -215,6 +215,7 @@ export async function fetchAccreditationTypes(): Promise<AccreditationType[]> {
     const data = await apiClient(ENDPOINTS.ACCREDITATION_TYPES.BASE);
     if (Array.isArray(data)) {
       return data.map((a: any) => ({
+        id: a.id,
         code: a.code as AccreditationCode,
         name: a.name,
         color: a.color || "#2563eb",
@@ -239,6 +240,7 @@ export async function createAccreditationTypeApi(data: {
     body: JSON.stringify(data),
   });
   return {
+    id: a.id,
     code: a.code as AccreditationCode,
     name: a.name,
     color: a.color || "#2563eb",

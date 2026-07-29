@@ -108,12 +108,15 @@ export function ImportModal({
     setLoading(true);
     try {
       const res = await importParticipantsApi(file);
-      const importedCount = Array.isArray(res) ? res.length : res.count || res.importedCount || "barcha";
+      const successCount = res.successCount ?? 0;
+      const errorCount = res.errorCount ?? 0;
       toast({
-        title: "Import muvaffaqiyatli yakunlandi!",
-        description: `${importedCount} ta ishtirokchi ma'lumotlari tizimga kiritildi.`,
-        status: "success",
-        duration: 4000,
+        title: errorCount === 0 ? "Import muvaffaqiyatli yakunlandi!" : "Import yakunlandi (xatolar bilan)",
+        description: errorCount === 0
+          ? `${successCount} ta ishtirokchi muvaffaqiyatli import qilindi.`
+          : `${successCount} ta muvaffaqiyatli, ${errorCount} ta xato.`,
+        status: errorCount === 0 ? "success" : "warning",
+        duration: 5000,
         isClosable: true,
       });
       handleCloseModal();

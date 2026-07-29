@@ -31,7 +31,7 @@ export function ParticipantFormModal({
     docNumber: string;
     phone: string;
     organization: string;
-    accreditation: AccreditationCode;
+    accreditation: string;
     sport?: string;
   }) => void;
   initial: Participant | null;
@@ -40,7 +40,7 @@ export function ParticipantFormModal({
   const [docNumber, setDocNumber] = useState(initial?.docNumber ?? "");
   const [phone, setPhone] = useState(initial?.phone ?? "");
   const [organization, setOrganization] = useState(initial?.organization ?? "");
-  const [accreditation, setAccreditation] = useState<AccreditationCode>(initial?.accreditation ?? "ATH");
+  const [accreditation, setAccreditation] = useState<string>(initial?.accreditation ?? "");
   const [sport, setSport] = useState(initial?.sport ?? "");
   const [types, setTypes] = useState<AccreditationType[]>([]);
 
@@ -57,9 +57,9 @@ export function ParticipantFormModal({
     lastInitialId.current = initial?.id ?? null;
     if (initial) {
       setFullName(initial.fullName);
-      setDocNumber(initial.docNumber);
-      setPhone(initial.phone);
-      setOrganization(initial.organization);
+      setDocNumber(initial.docNumber ?? "");
+      setPhone(initial.phone ?? "");
+      setOrganization(initial.organization ?? "");
       setAccreditation(initial.accreditation);
       setSport(initial.sport ?? "");
     } else {
@@ -67,7 +67,7 @@ export function ParticipantFormModal({
       setDocNumber("");
       setPhone("");
       setOrganization("");
-      setAccreditation("ATH");
+      setAccreditation("");
       setSport("");
     }
   }
@@ -103,13 +103,13 @@ export function ParticipantFormModal({
             <HStack spacing={4}>
               <FormControl>
                 <FormLabel fontSize="13px" color="ink.500">Akkreditatsiya turi</FormLabel>
-                <Select variant="outline" value={accreditation} onChange={(e) => setAccreditation(e.target.value as AccreditationCode)}>
+                <Select variant="outline" value={accreditation} onChange={(e) => setAccreditation(e.target.value)}>
                   {types.length > 0 ? (
                     types.map((a) => (
-                      <option key={a.code} value={a.code} style={{ background: "#12151B" }}>{a.name}</option>
+                      <option key={a.id} value={a.id} style={{ background: "#12151B" }}>{a.name}</option>
                     ))
                   ) : (
-                    <option value="ATH" style={{ background: "#12151B" }}>Sportchi</option>
+                    <option value="" style={{ background: "#12151B" }}>Yuklanmoqda...</option>
                   )}
                 </Select>
               </FormControl>

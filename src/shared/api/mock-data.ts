@@ -19,13 +19,13 @@ import {
 // ---------------------------------------------------------------------------
 
 export const accreditationTypes: AccreditationType[] = [
-  { code: "ATH", name: "Sportchi", color: "#4C8DFF", allowedZoneCodes: ["FOP", "MPC", "REST", "MED", "WU"], mealAllowed: true },
-  { code: "COACH", name: "Murabbiy", color: "#3FB67F", allowedZoneCodes: ["FOP", "MPC", "REST", "WU"], mealAllowed: true },
-  { code: "REF", name: "Hakam", color: "#E8A23D", allowedZoneCodes: ["FOP", "MPC", "REST", "OC"], mealAllowed: true },
-  { code: "VOL", name: "Volontyor", color: "#9C7830", allowedZoneCodes: ["MPC", "REST", "OC"], mealAllowed: true },
-  { code: "DEL", name: "Delegatsiya a'zosi", color: "#8D96A8", allowedZoneCodes: ["MPC", "OC", "VIP"], mealAllowed: false },
-  { code: "MEDIA", name: "Jurnalist", color: "#D4A853", allowedZoneCodes: ["MPC", "MEDIA_C"], mealAllowed: false },
-  { code: "VIP", name: "VIP mehmon", color: "#E5484D", allowedZoneCodes: ["VIP", "OC"], mealAllowed: false },
+  { id: "mock-ath", code: "ATH", name: "Sportchi", color: "#4C8DFF", allowedZoneCodes: ["FOP", "MPC", "REST", "MED", "WU"], mealAllowed: true },
+  { id: "mock-coach", code: "COACH", name: "Murabbiy", color: "#3FB67F", allowedZoneCodes: ["FOP", "MPC", "REST", "WU"], mealAllowed: true },
+  { id: "mock-ref", code: "REF", name: "Hakam", color: "#E8A23D", allowedZoneCodes: ["FOP", "MPC", "REST", "OC"], mealAllowed: true },
+  { id: "mock-vol", code: "VOL", name: "Volontyor", color: "#9C7830", allowedZoneCodes: ["MPC", "REST", "OC"], mealAllowed: true },
+  { id: "mock-del", code: "DEL", name: "Delegatsiya a'zosi", color: "#8D96A8", allowedZoneCodes: ["MPC", "OC", "VIP"], mealAllowed: false },
+  { id: "mock-media", code: "MEDIA", name: "Jurnalist", color: "#D4A853", allowedZoneCodes: ["MPC", "MEDIA_C"], mealAllowed: false },
+  { id: "mock-vip", code: "VIP", name: "VIP mehmon", color: "#E5484D", allowedZoneCodes: ["VIP", "OC"], mealAllowed: false },
 ];
 
 export const zones: Zone[] = [

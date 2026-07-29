@@ -118,7 +118,7 @@ export function ParticipantsPage() {
         phone: fields.phone,
         organization: fields.organization,
         sportType: fields.sport,
-        accreditationTypeId: fields.accreditation || "ATH",
+        accreditationTypeId: fields.accreditation,
       });
 
       setList((prev) => [newP, ...prev]);
