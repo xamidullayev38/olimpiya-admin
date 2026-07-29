@@ -107,10 +107,10 @@ export default function ZonesPage() {
   async function handleDeleteZone(z: Zone) {
     if (!window.confirm(`Rostdan ham ${z.name} zonasini o'chirmoqchimisiz?`)) return;
     try {
-      await deleteZoneApi(z.id || z.code); // Fallback if z.id is missing but backend accepts id. Wait, fetchZones maps id to id? Let me pass z.id. 
+      await deleteZoneApi((z.id || z.code) as string); // Fallback if z.id is missing but backend accepts id. Wait, fetchZones maps id to id? Let me pass z.id. 
       // I should pass z.id, assuming it exists. If not, I'll pass z.code and backend will not find it unless backend handles it. But backend delete is by ID.
       // Wait, let's look at fetchZones mapping.
-      await deleteZoneApi(z.id);
+      await deleteZoneApi(z.id as string);
       setZones(prev => prev.filter(x => x.id !== z.id));
       toast({ title: "Zona o'chirildi", status: "success", duration: 2500 });
     } catch (err: any) {
