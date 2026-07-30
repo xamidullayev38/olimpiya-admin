@@ -33,12 +33,15 @@ import { LuMapPin, LuScanLine, LuPlus, LuTrash } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
 import { fetchZones, fetchAccreditationTypes, createZoneApi, deleteZoneApi } from "@/shared/api/services";
 import { Zone, ZoneKind, AccreditationType } from "@/shared/types";
+import { DeviceManagerModal } from "./DeviceManagerModal";
 
 export default function ZonesPage() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [accTypes, setAccTypes] = useState<AccreditationType[]>([]);
   const [loading, setLoading] = useState(true);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen: isDeviceModalOpen, onOpen: onDeviceModalOpen, onClose: onDeviceModalClose } = useDisclosure();
+  const [selectedZoneForDevices, setSelectedZoneForDevices] = useState<Zone | null>(null);
   const toast = useToast();
 
   const [name, setName] = useState("");
@@ -216,11 +219,21 @@ export default function ZonesPage() {
                     )}
                   </VStack>
 
-                  <HStack fontSize="12px" color="ink.500" mb={3} spacing={4}>
+                  <HStack fontSize="12px" color="ink.500" mb={3} justify="space-between">
                     <HStack spacing={1.5}>
                       <LuScanLine size={13} />
-                      <Text>{z.scanPoints} ta skaner nuqta</Text>
+                      <Text>{z.devices?.length || 0} ta faol qurilma</Text>
                     </HStack>
+                    <Button 
+                      size="xs" 
+                      variant="outline" 
+                      onClick={() => {
+                        setSelectedZoneForDevices(z);
+                        onDeviceModalOpen();
+                      }}
+                    >
+                      Boshqarish
+                    </Button>
                   </HStack>
 
                   <Text fontSize="11px" color="ink.300" mb={1.5} letterSpacing="0.03em">
@@ -337,6 +350,13 @@ export default function ZonesPage() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+
+      <DeviceManagerModal 
+        isOpen={isDeviceModalOpen} 
+        onClose={onDeviceModalClose} 
+        zone={selectedZoneForDevices}
+        onDeviceUpdated={() => loadData()}
+      />
     </Box>
   );
 }

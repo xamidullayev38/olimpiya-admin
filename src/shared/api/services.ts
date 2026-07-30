@@ -213,6 +213,14 @@ export async function fetchZones(): Promise<Zone[]> {
         scanPoints: z.devices?.length || 1,
         currentInside: 0,
         capacity: 500,
+        devices: z.devices ? z.devices.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          status: d.status === "ACTIVE" ? "faol" : "bekor_qilingan",
+          zoneId: z.id,
+          zoneName: z.name,
+          lastSeenAt: d.lastSeenAt ? d.lastSeenAt.replace("T", " ").slice(0, 19) : "—",
+        })) : [],
       }));
     }
   } catch (e) {
@@ -540,7 +548,7 @@ export async function fetchDevices(): Promise<any[]> {
   return [];
 }
 
-export async function createDeviceApi(data: { name: string; zoneId?: string }): Promise<any> {
+export async function createDeviceApi(data: { name: string; zoneId?: string; deviceKey?: string }): Promise<any> {
   const d = await apiClient(ENDPOINTS.DEVICES.BASE, {
     method: "POST",
     body: JSON.stringify(data),
@@ -552,6 +560,19 @@ export async function createDeviceApi(data: { name: string; zoneId?: string }): 
     zoneId: data.zoneId,
     deviceKey: d.rawDeviceKey || d.deviceKey,
   };
+}
+
+export async function updateDeviceApi(id: string, data: { name?: string; deviceKey?: string; status?: "ACTIVE" | "REVOKED" }): Promise<any> {
+  const d = await apiClient(`${ENDPOINTS.DEVICES.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  return d;
+}
+
+export async function deleteDeviceApi(id: string): Promise<boolean> {
+  await apiClient(`${ENDPOINTS.DEVICES.BASE}/${id}`, { method: "DELETE" });
+  return true;
 }
 
 export async function revokeDeviceApi(id: string): Promise<boolean> {
