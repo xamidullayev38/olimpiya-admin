@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
-import { getCookie } from "@/shared/lib/cookies";
+import { getCookie } from "@/shared/api/client";
 
 export default function ScannerPage() {
   const [scanResult, setScanResult] = useState<any>(null);
