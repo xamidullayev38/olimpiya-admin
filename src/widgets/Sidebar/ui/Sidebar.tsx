@@ -55,12 +55,6 @@ const navItems: NavItem[] = [
     roles: ["SUPER_ADMIN", "ANALYST", "ZONE_MANAGER"],
   },
   {
-    href: "/scanner",
-    label: "QR Skaner",
-    icon: LuScanLine,
-    roles: ["SUPER_ADMIN", "OPERATOR", "ZONE_MANAGER"],
-  },
-  {
     href: "/settings",
     label: "Sozlamalar",
     icon: LuSettings,
