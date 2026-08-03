@@ -21,7 +21,7 @@ export async function loginWithApi(username: string, password?: string) {
         username,
         password: password || "",
       }),
-      timeoutMs: 3500,
+      timeoutMs: 8000,
     });
 
     if (response && response.accessToken) {
