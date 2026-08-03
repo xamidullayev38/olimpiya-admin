@@ -38,48 +38,10 @@ export async function loginWithApi(username: string, password?: string) {
       return { success: false, error: err.message || "Login yoki parol noto'g'ri" };
     }
 
-    // Backend is offline, fallback to local mock login with role based on username
-    loginLocal(username);
-    return { success: true, isMock: true, error: err.message };
+    return { success: false, error: err.message || "Tizimga kirishda xatolik yuz berdi" };
   }
 }
 
-export function loginLocal(username: string) {
-  const maxAge = 60 * 60 * 24 * 7;
-  const lower = username.toLowerCase();
-  let role = "OPERATOR";
-  let fullName = username;
-
-  if (lower.includes("admin")) {
-    role = "SUPER_ADMIN";
-    fullName = "Administrator";
-  } else if (lower.includes("zone") || lower.includes("menejer")) {
-    role = "ZONE_MANAGER";
-    fullName = "Zona Menejeri";
-  } else if (lower.includes("analyst") || lower.includes("tahlil")) {
-    role = "ANALYST";
-    fullName = "Tahlilchi";
-  } else if (lower.includes("operator")) {
-    role = "OPERATOR";
-    fullName = "Akkreditatsiya Operatori";
-  }
-
-  const mockUser: UserProfile = {
-    username,
-    fullName,
-    roles: [role],
-    permissions: role === "SUPER_ADMIN" ? ["*"] : ["participant.create", "badge.print"],
-  };
-
-  setCookie(SESSION_USER_KEY, JSON.stringify(mockUser), 7);
-  document.cookie = `${AUTH_COOKIE}=${encodeURIComponent(
-    username
-  )}; path=/; max-age=${maxAge}; SameSite=Lax`;
-}
-
-export function login(username: string) {
-  loginLocal(username);
-}
 
 export function logout() {
   clearAuthTokens();

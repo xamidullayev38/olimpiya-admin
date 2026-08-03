@@ -28,8 +28,8 @@ import Topbar from "@/widgets/Topbar/ui/Topbar";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { fetchAccessLogs, fetchMealLogs } from "@/shared/api/services";
 import { AccessLogEntry, MealLogEntry } from "@/shared/types";
-import { API_BASE_URL, ENDPOINTS } from "@/shared/api/endpoints";
-import { getAccessToken } from "@/shared/api/client";
+import { ENDPOINTS } from "@/shared/api/endpoints";
+import { apiClient } from "@/shared/api/client";
 
 const ACC_COLORS: Record<string, { color: string; name: string }> = {
   ATH: { color: "#4C8DFF", name: "Sportchi" },
@@ -68,45 +68,29 @@ export default function ReportsPage() {
 
   async function handleExportExcel() {
     try {
-      const token = getAccessToken();
-      const res = await fetch(`${API_BASE_URL}${ENDPOINTS.ACCESS_LOGS.EXPORT}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "access-logs.xlsx";
-        a.click();
-        toast({ title: "Excel hisoboti yuklab olindi", status: "success", duration: 3000 });
-      } else {
-        toast({ title: "Hisobot yaratishda xatolik", status: "error", duration: 3000 });
-      }
+      const blob = await apiClient<Blob>(ENDPOINTS.ACCESS_LOGS.EXPORT);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "access-logs.xlsx";
+      a.click();
+      toast({ title: "Excel hisoboti yuklab olindi", status: "success", duration: 3000 });
     } catch {
-      toast({ title: "Backend server bilan aloqa chiqmadi", status: "warning", duration: 3000 });
+      toast({ title: "Hisobot yaratishda xatolik yuz berdi", status: "error", duration: 3000 });
     }
   }
 
   async function handleExportPdf() {
     try {
-      const token = getAccessToken();
-      const res = await fetch(`${API_BASE_URL}/access-logs/export/pdf`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (res.ok) {
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "access-logs.pdf";
-        a.click();
-        toast({ title: "PDF hisoboti yuklab olindi", status: "success", duration: 3000 });
-      } else {
-        toast({ title: "Hisobot yaratishda xatolik", status: "error", duration: 3000 });
-      }
+      const blob = await apiClient<Blob>("/access-logs/export/pdf");
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "access-logs.pdf";
+      a.click();
+      toast({ title: "PDF hisoboti yuklab olindi", status: "success", duration: 3000 });
     } catch {
-      toast({ title: "Backend server bilan aloqa chiqmadi", status: "warning", duration: 3000 });
+      toast({ title: "Hisobot yaratishda xatolik yuz berdi", status: "error", duration: 3000 });
     }
   }
 

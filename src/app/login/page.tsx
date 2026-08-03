@@ -42,15 +42,6 @@ function LoginForm() {
     try {
       const res = await loginWithApi(username, password);
       if (res.success) {
-        if (res.isMock) {
-          toast({
-            title: "Demo rejimda kirildi",
-            description: "Backend bilan aloqa o'rnatilmadi. Demo ma'lumotlar bilan ishlanmoqda.",
-            status: "warning",
-            duration: 3000,
-            isClosable: true,
-          });
-        }
         const from = searchParams?.get("from");
         router.push(from && from !== "/login" ? from : "/dashboard");
       } else {

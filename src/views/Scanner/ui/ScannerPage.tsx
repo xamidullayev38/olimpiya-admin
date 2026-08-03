@@ -11,7 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
-import { getCookie } from "@/shared/api/client";
+import { apiClient } from "@/shared/api/client";
 
 export default function ScannerPage() {
   const [scanResult, setScanResult] = useState<any>(null);
@@ -31,17 +31,10 @@ export default function ScannerPage() {
       scanner.pause(true);
 
       try {
-        const token = getCookie("staff_token"); // Admin JWT
-        const res = await fetch("http://localhost:3000/v1/scan/verify", {
+        const data = await apiClient("/scan/verify", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
           body: JSON.stringify({ qrToken: decodedText }),
         });
-        
-        const data = await res.json();
         setScanResult(data);
         
         if (data.valid) {
@@ -84,7 +77,7 @@ export default function ScannerPage() {
     scanner.render(onScanSuccess, onScanFailure);
 
     return () => {
-      scanner.clear().catch(error => console.error("Failed to clear html5QrcodeScanner. ", error));
+      scanner.clear().catch(() => {});
     };
   }, []);
 

@@ -72,7 +72,7 @@ export function UsersPanel() {
       const created = await createUserApi({
         fullName: name.trim(),
         username: uName,
-        password: password || "Password123!",
+        password: password,
         roleIds: roleId ? [roleId] : [],
       });
       setUsers((prev) => [created, ...prev]);

@@ -212,7 +212,7 @@ export async function fetchZones(): Promise<Zone[]> {
         kind: z.requiresAccessControl ? "kirish_chiqish" : "ochiq",
         scanPoints: z.devices?.length || 1,
         currentInside: 0,
-        capacity: 500,
+        capacity: z.description && z.description.includes("Sig'imi: ") ? parseInt(z.description.split("Sig'imi: ")[1]) : undefined,
         devices: z.devices ? z.devices.map((d: any) => ({
           id: d.id,
           name: d.name,
@@ -246,7 +246,7 @@ export async function createZoneApi(data: {
     kind: z.requiresAccessControl ? "kirish_chiqish" : "ochiq",
     scanPoints: 1,
     currentInside: 0,
-    capacity: 500,
+    capacity: (z.description || data.description) && (z.description || data.description).includes("Sig'imi: ") ? parseInt((z.description || data.description).split("Sig'imi: ")[1]) : undefined,
   };
 }
 
@@ -378,7 +378,7 @@ export async function createUserApi(data: {
     body: JSON.stringify({
       fullName: data.fullName,
       username: data.username,
-      password: data.password || "Password123!",
+      password: data.password,
       roleIds: data.roleIds,
     }),
   });
