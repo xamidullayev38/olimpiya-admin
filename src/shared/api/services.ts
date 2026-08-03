@@ -356,9 +356,12 @@ export async function fetchUsers(): Promise<SystemUser[]> {
         id: u.id,
         fullName: u.fullName,
         username: u.username,
-        roleIds: u.roles?.map((r: any) => r.role?.id || r.roleId) || [],
+        email: u.email,
+        roleIds: u.roles?.map((r: any) => r.role?.id || r.roleId || r.role?.name) || [],
         status: u.isActive ? "faol" : "bloklangan",
-        lastActive: u.updatedAt ? u.updatedAt.split("T")[0] : "—",
+        lastActive: u.lastLoginAt ? u.lastLoginAt.replace("T", " ").slice(0, 19) : "—",
+        assignedZoneId: u.assignedZoneId || u.assignedZone?.id,
+        assignedZone: u.assignedZone ? { id: u.assignedZone.id, name: u.assignedZone.name, code: u.assignedZone.code } : undefined,
       }));
     }
   } catch (e) {
@@ -372,6 +375,7 @@ export async function createUserApi(data: {
   username: string;
   password?: string;
   roleIds: string[];
+  assignedZoneId?: string;
 }): Promise<SystemUser> {
   const u = await apiClient(ENDPOINTS.USERS.BASE, {
     method: "POST",
@@ -380,15 +384,43 @@ export async function createUserApi(data: {
       username: data.username,
       password: data.password,
       roleIds: data.roleIds,
+      assignedZoneId: data.assignedZoneId || undefined,
     }),
   });
   return {
     id: u.id,
     fullName: u.fullName,
     username: u.username,
+    email: u.email,
     roleIds: data.roleIds,
     status: "faol",
-    lastActive: new Date().toISOString().split("T")[0],
+    lastActive: "—",
+    assignedZoneId: u.assignedZoneId || u.assignedZone?.id,
+    assignedZone: u.assignedZone,
+  };
+}
+
+export async function updateUserApi(id: string, data: {
+  fullName?: string;
+  email?: string;
+  roleIds?: string[];
+  assignedZoneId?: string;
+  isActive?: boolean;
+}): Promise<SystemUser> {
+  const u = await apiClient(`${ENDPOINTS.USERS.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  return {
+    id: u.id,
+    fullName: u.fullName,
+    username: u.username,
+    email: u.email,
+    roleIds: data.roleIds || (u.roles?.map((r: any) => r.role?.id || r.roleId) || []),
+    status: u.isActive ? "faol" : "bloklangan",
+    lastActive: u.lastLoginAt ? u.lastLoginAt.replace("T", " ").slice(0, 19) : "—",
+    assignedZoneId: u.assignedZoneId || u.assignedZone?.id,
+    assignedZone: u.assignedZone,
   };
 }
 

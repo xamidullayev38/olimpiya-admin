@@ -110,9 +110,12 @@ export interface SystemUser {
   id: string;
   fullName: string;
   username: string;
+  email?: string;
   roleIds: string[];
   status: "faol" | "bloklangan";
   lastActive: string;
+  assignedZoneId?: string;
+  assignedZone?: { id: string; name: string; code: string };
 }
 
 export interface AuditLogEntry {
