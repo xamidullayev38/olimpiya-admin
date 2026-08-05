@@ -205,7 +205,7 @@ export function DevicesPanel() {
             )}
           </ModalBody>
           <ModalFooter>
-            {createdKey ? (
+            {createdDevice ? (
               <Button onClick={handleCloseModal}>Yopish</Button>
             ) : (
               <>
