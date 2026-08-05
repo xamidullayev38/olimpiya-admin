@@ -46,7 +46,7 @@ export function DevicesPanel() {
 
   const [name, setName] = useState("");
   const [zoneId, setZoneId] = useState("");
-  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [createdDevice, setCreatedDevice] = useState<{ id: string; key: string } | null>(null);
 
   async function loadData() {
     setLoading(true);
@@ -76,7 +76,7 @@ export function DevicesPanel() {
         name: name.trim(),
         zoneId: zoneId || undefined,
       });
-      setCreatedKey(created.deviceKey || "—");
+      setCreatedDevice({ id: created.id, key: created.deviceKey || "—" });
       toast({ title: "Qurilma muvaffaqiyatli ro'yxatga olindi", status: "success", duration: 3000 });
       loadData();
     } catch (err: any) {
@@ -97,7 +97,7 @@ export function DevicesPanel() {
   function handleCloseModal() {
     setName("");
     setZoneId("");
-    setCreatedKey(null);
+    setCreatedDevice(null);
     onClose();
   }
 
@@ -168,17 +168,21 @@ export function DevicesPanel() {
           <ModalHeader color="ink.900">Skaner qurilmani ro'yxatga olish</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            {createdKey ? (
+            {createdDevice ? (
               <VStack align="stretch" spacing={3}>
                 <Alert status="success" borderRadius="md" bg="rgba(63, 182, 127, 0.1)" color="signal.green">
                   <AlertIcon />
-                  Qurilma yaratildi! Ushbu maxfiy kalitni mobil skaner ilovasiga kiriting.
+                  Qurilma yaratildi! Ushbu ma'lumotlarni mobil skaner ilovasiga kiriting.
                 </Alert>
+                <Text fontSize="13px" color="ink.500">Qurilma ID (Device ID):</Text>
+                <Code p={3} borderRadius="md" colorScheme="blue" fontSize="14px" textAlign="center" wordBreak="break-all">
+                  {createdDevice.id}
+                </Code>
                 <Text fontSize="13px" color="ink.500">Qurilma maxfiy kaliti (Device Key):</Text>
                 <Code p={3} borderRadius="md" colorScheme="yellow" fontSize="14px" textAlign="center" wordBreak="break-all">
-                  {createdKey}
+                  {createdDevice.key}
                 </Code>
-                <Text fontSize="11px" color="ink.300">⚠️ Ogohlantirish: Maxfiy kalit qayta ko'rsatilmadi, uni saqlab oling.</Text>
+                <Text fontSize="11px" color="ink.300">⚠️ Ogohlantirish: Ushbu ma'lumotlar qayta ko'rsatilmadi, ularni nusxalab oling.</Text>
               </VStack>
             ) : (
               <VStack spacing={4} align="stretch">
