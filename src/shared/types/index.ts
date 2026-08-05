@@ -53,6 +53,7 @@ export interface Zone {
   currentInside: number;
   capacity?: number;
   devices?: ScannerDevice[];
+  isAllAllowed?: boolean;
 }
 
 export type MealType = "Nonushta" | "Tushlik" | "Kechki ovqat";

@@ -213,6 +213,7 @@ export async function fetchZones(): Promise<Zone[]> {
         scanPoints: z.devices?.length || 1,
         currentInside: 0,
         capacity: z.description && z.description.includes("Sig'imi: ") ? parseInt(z.description.split("Sig'imi: ")[1]) : undefined,
+        isAllAllowed: z.accessRules ? z.accessRules.length === 0 : true,
         devices: z.devices ? z.devices.map((d: any) => ({
           id: d.id,
           name: d.name,

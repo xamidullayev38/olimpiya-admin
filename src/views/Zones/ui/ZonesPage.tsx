@@ -477,7 +477,7 @@ export default function ZonesPage() {
       <DeviceManagerModal 
         isOpen={isDeviceModalOpen} 
         onClose={onDeviceModalClose} 
-        zone={selectedZoneForDevices}
+        zone={zones.find(z => z.id === selectedZoneForDevices?.id) || selectedZoneForDevices}
         onDeviceUpdated={() => loadData()}
       />
     </Box>

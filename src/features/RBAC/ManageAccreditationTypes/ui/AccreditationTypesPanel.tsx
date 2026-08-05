@@ -131,35 +131,43 @@ export function AccreditationTypesPanel() {
               </Tr>
             </Thead>
             <Tbody>
-              {types.map((t) => (
-                <Tr key={t.code} _hover={{ bg: "surface.700" }}>
-                  <Td fontWeight="600" color="ink.900">
-                    {t.name}
-                  </Td>
-                  <Td fontFamily="mono" fontSize="12px">{t.code}</Td>
-                  <Td>
-                    <HStack spacing={2}>
-                      <Box w="14px" h="14px" borderRadius="4px" bg={t.color} />
-                      <Text fontFamily="mono" fontSize="11px" color="ink.500">{t.color}</Text>
-                    </HStack>
-                  </Td>
-                  <Td>
-                    <Wrap spacing={1}>
-                      {(t.allowedZoneCodes || []).map((zc) => (
-                        <WrapItem key={zc}>
-                          <Badge bg="surface.600" color="ink.700" fontSize="10px">{zc}</Badge>
-                        </WrapItem>
-                      ))}
-                    </Wrap>
-                  </Td>
-                  <Td>
-                    <StatusPill
-                      label={t.mealAllowed ? "Ruxsat bor" : "Ruxsat yo'q"}
-                      tone={t.mealAllowed ? "success" : "neutral"}
-                    />
-                  </Td>
-                </Tr>
-              ))}
+              {types.map((t) => {
+                const openZoneCodes = zones.filter((z) => z.isAllAllowed).map((z) => z.code);
+                const combinedZoneCodes = Array.from(new Set([...(t.allowedZoneCodes || []), ...openZoneCodes]));
+
+                return (
+                  <Tr key={t.code} _hover={{ bg: "surface.700" }}>
+                    <Td fontWeight="600" color="ink.900">
+                      {t.name}
+                    </Td>
+                    <Td fontFamily="mono" fontSize="12px">{t.code}</Td>
+                    <Td>
+                      <HStack spacing={2}>
+                        <Box w="14px" h="14px" borderRadius="4px" bg={t.color} />
+                        <Text fontFamily="mono" fontSize="11px" color="ink.500">{t.color}</Text>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Wrap spacing={1}>
+                        {combinedZoneCodes.map((zc) => (
+                          <WrapItem key={zc}>
+                            <Badge bg="surface.600" color="ink.700" fontSize="10px">{zc}</Badge>
+                          </WrapItem>
+                        ))}
+                        {combinedZoneCodes.length === 0 && (
+                          <Text fontSize="12px" color="ink.500">—</Text>
+                        )}
+                      </Wrap>
+                    </Td>
+                    <Td>
+                      <StatusPill
+                        label={t.mealAllowed ? "Ruxsat bor" : "Ruxsat yo'q"}
+                        tone={t.mealAllowed ? "success" : "neutral"}
+                      />
+                    </Td>
+                  </Tr>
+                );
+              })}
             </Tbody>
           </Table>
         </Box>
