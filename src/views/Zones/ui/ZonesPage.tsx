@@ -29,7 +29,7 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { LuMapPin, LuScanLine, LuPlus, LuTrash, LuEdit } from "react-icons/lu";
+import { LuMapPin, LuScanLine, LuPlus, LuTrash, LuPencil } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
 import { fetchZones, fetchAccreditationTypes, createZoneApi, deleteZoneApi, updateZoneApi } from "@/shared/api/services";
 import { Zone, ZoneKind, AccreditationType } from "@/shared/types";
@@ -232,7 +232,7 @@ export default function ZonesPage() {
                       </Badge>
                       <IconButton
                         aria-label="Tahrirlash"
-                        icon={<LuEdit size={14} />}
+                        icon={<LuPencil size={14} />}
                         size="xs"
                         variant="ghost"
                         colorScheme="blue"
