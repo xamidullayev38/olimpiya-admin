@@ -83,7 +83,7 @@ export async function fetchParticipants(params?: {
       organization: item.organization || "—",
       badgeStatus: mapBadgeStatus(item.badgeStatus),
       badgeId: `BADGE-${item.id.slice(0, 6).toUpperCase()}`,
-      qrToken: item.qrTokenId || `qr_${item.id}`,
+      qrToken: item.qrToken || item.qrTokenId || `qr_${item.id}`,
       createdAt: item.createdAt ? item.createdAt.split("T")[0] : "—",
     }));
   } catch (e) {
@@ -118,7 +118,7 @@ export async function createParticipantApi(data: {
     organization: res.organization || data.organization || "—",
     badgeStatus: mapBadgeStatus(res.badgeStatus),
     badgeId: `BADGE-${res.id.slice(0, 6).toUpperCase()}`,
-    qrToken: res.qrTokenId || `qr_${res.id}`,
+    qrToken: res.qrToken || res.qrTokenId || `qr_${res.id}`,
     createdAt: new Date().toISOString().split("T")[0],
   };
 }
@@ -150,7 +150,7 @@ export async function updateParticipantApi(id: string, data: Partial<{
     organization: res.organization || data.organization || "—",
     badgeStatus: mapBadgeStatus(res.badgeStatus),
     badgeId: `BADGE-${res.id.slice(0, 6).toUpperCase()}`,
-    qrToken: res.qrTokenId || `qr_${res.id}`,
+    qrToken: res.qrToken || `qr_${res.id}`,
     createdAt: new Date().toISOString().split("T")[0],
   };
 }
