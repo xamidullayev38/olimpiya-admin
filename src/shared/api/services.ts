@@ -586,11 +586,11 @@ export async function createDeviceApi(data: { name: string; zoneId?: string; dev
     body: JSON.stringify(data),
   });
   return {
-    id: d.device?.id || d.id,
-    name: d.device?.name || data.name,
+    id: d.deviceId || d.id,
+    name: d.name || data.name,
     status: "faol",
     zoneId: data.zoneId,
-    deviceKey: d.rawDeviceKey || d.deviceKey,
+    deviceKey: d.deviceKey || d.rawDeviceKey,
   };
 }
 
