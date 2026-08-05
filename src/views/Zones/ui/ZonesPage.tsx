@@ -29,11 +29,12 @@ import {
   IconButton,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { LuMapPin, LuScanLine, LuPlus, LuTrash } from "react-icons/lu";
+import { LuMapPin, LuScanLine, LuPlus, LuTrash, LuEdit } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
-import { fetchZones, fetchAccreditationTypes, createZoneApi, deleteZoneApi } from "@/shared/api/services";
+import { fetchZones, fetchAccreditationTypes, createZoneApi, deleteZoneApi, updateZoneApi } from "@/shared/api/services";
 import { Zone, ZoneKind, AccreditationType } from "@/shared/types";
 import { DeviceManagerModal } from "./DeviceManagerModal";
+import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
 
 export default function ZonesPage() {
   const [zones, setZones] = useState<Zone[]>([]);
@@ -49,6 +50,10 @@ export default function ZonesPage() {
   const [kind, setKind] = useState<ZoneKind>("kirish_chiqish");
   const [scanPoints, setScanPoints] = useState("1");
   const [capacity, setCapacity] = useState("");
+  const [selectedAccTypes, setSelectedAccTypes] = useState<string[]>([]);
+  
+  const { isOpen: isEditOpen, onOpen: onEditOpen, onClose: onEditClose } = useDisclosure();
+  const [editingZone, setEditingZone] = useState<Zone | null>(null);
 
   async function loadData() {
     setLoading(true);
@@ -74,6 +79,8 @@ export default function ZonesPage() {
     setKind("kirish_chiqish");
     setScanPoints("1");
     setCapacity("");
+    setSelectedAccTypes([]);
+    setEditingZone(null);
   }
 
   async function createZone() {
@@ -91,9 +98,10 @@ export default function ZonesPage() {
         code: code.trim().toUpperCase(),
         requiresAccessControl: kind === "kirish_chiqish",
         description: capacity ? `Sig'imi: ${capacity}` : undefined,
+        allowedAccreditationTypeIds: selectedAccTypes,
       });
 
-      setZones((prev) => [...prev, zone]);
+      await loadData();
       resetForm();
       onClose();
       toast({
@@ -105,6 +113,45 @@ export default function ZonesPage() {
     } catch (err: any) {
       toast({ title: "Zona yaratishda xatolik", description: err.message, status: "error", duration: 3000 });
     }
+  }
+
+  async function updateZone() {
+    if (!editingZone) return;
+    if (name.trim() === "" || code.trim() === "") {
+      toast({ title: "Nomi va kodi kiritilishi shart", status: "warning", duration: 2500 });
+      return;
+    }
+    if (zones.some((z) => z.id !== editingZone.id && z.code.toUpperCase() === code.trim().toUpperCase())) {
+      toast({ title: "Bu kod bilan boshqa zona allaqachon mavjud", status: "error", duration: 2500 });
+      return;
+    }
+    try {
+      await updateZoneApi(editingZone.id as string, {
+        name: name.trim(),
+        code: code.trim().toUpperCase(),
+        requiresAccessControl: kind === "kirish_chiqish",
+        description: capacity ? `Sig'imi: ${capacity}` : undefined,
+        allowedAccreditationTypeIds: selectedAccTypes,
+      });
+
+      await loadData();
+      onEditClose();
+      resetForm();
+      toast({ title: "Zona tahrirlandi", status: "success", duration: 3000 });
+    } catch (err: any) {
+      toast({ title: "Tahrirlashda xatolik", description: err.message, status: "error", duration: 3000 });
+    }
+  }
+
+  function handleEditClick(z: Zone) {
+    setEditingZone(z);
+    setName(z.name);
+    setCode(z.code);
+    setKind(z.kind);
+    setCapacity(z.capacity ? String(z.capacity) : "");
+    const allowed = accTypes.filter((a) => a.allowedZoneCodes?.includes(z.code)).map((a) => a.id);
+    setSelectedAccTypes(allowed);
+    onEditOpen();
   }
 
   async function handleDeleteZone(z: Zone) {
@@ -183,6 +230,14 @@ export default function ZonesPage() {
                       >
                         {z.kind === "kirish_chiqish" ? "IN / OUT" : "Ochiq"}
                       </Badge>
+                      <IconButton
+                        aria-label="Tahrirlash"
+                        icon={<LuEdit size={14} />}
+                        size="xs"
+                        variant="ghost"
+                        colorScheme="blue"
+                        onClick={() => handleEditClick(z)}
+                      />
                       <IconButton
                         aria-label="O'chirish"
                         icon={<LuTrash size={14} />}
@@ -330,6 +385,23 @@ export default function ZonesPage() {
                   />
                 </FormControl>
               </HStack>
+              <FormControl mt={2}>
+                <FormLabel fontSize="13px" color="ink.500">Ruxsat etilgan akkreditatsiya turlari</FormLabel>
+                <CheckboxGroup value={selectedAccTypes} onChange={(val) => setSelectedAccTypes(val as string[])}>
+                  <Wrap spacing={3}>
+                    {accTypes.map((a) => (
+                      <WrapItem key={a.id}>
+                        <Checkbox value={a.id} colorScheme="blue" size="sm">
+                          <Text fontSize="13px" color="ink.900">{a.name}</Text>
+                        </Checkbox>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </CheckboxGroup>
+                <Text fontSize="11px" color="ink.500" mt={2}>
+                  Hech narsa tanlanmasa, zona barcha uchun ochiq bo'ladi.
+                </Text>
+              </FormControl>
             </VStack>
           </ModalBody>
           <ModalFooter>
@@ -344,6 +416,60 @@ export default function ZonesPage() {
               Bekor qilish
             </Button>
             <Button onClick={createZone}>Zonani yaratish</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal isOpen={isEditOpen} onClose={() => { resetForm(); onEditClose(); }} size="lg">
+        <ModalOverlay />
+        <ModalContent bg="surface.800" border="1px solid" borderColor="line.900">
+          <ModalHeader color="ink.900">Zonani tahrirlash</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4} align="stretch">
+              <HStack spacing={4}>
+                <FormControl>
+                  <FormLabel fontSize="13px" color="ink.500">Nomi</FormLabel>
+                  <Input bg="canvas.900" borderColor="line.800" value={name} onChange={(e) => setName(e.target.value)} />
+                </FormControl>
+                <FormControl maxW="140px">
+                  <FormLabel fontSize="13px" color="ink.500">Kodi</FormLabel>
+                  <Input bg="canvas.900" borderColor="line.800" value={code} onChange={(e) => setCode(e.target.value)} />
+                </FormControl>
+              </HStack>
+              <HStack spacing={4}>
+                <FormControl>
+                  <FormLabel fontSize="13px" color="ink.500">Zona turi</FormLabel>
+                  <Select bg="canvas.900" borderColor="line.800" value={kind} onChange={(e) => setKind(e.target.value as ZoneKind)}>
+                    <option value="kirish_chiqish">Kirish-chiqish nazorati</option>
+                    <option value="ochiq">Ochiq (nazoratsiz)</option>
+                  </Select>
+                </FormControl>
+                <FormControl>
+                  <FormLabel fontSize="13px" color="ink.500">Sig&apos;imi</FormLabel>
+                  <Input type="number" min={0} bg="canvas.900" borderColor="line.800" value={capacity} onChange={(e) => setCapacity(e.target.value)} />
+                </FormControl>
+              </HStack>
+              <FormControl mt={2}>
+                <FormLabel fontSize="13px" color="ink.500">Ruxsat etilgan akkreditatsiya turlari</FormLabel>
+                <CheckboxGroup value={selectedAccTypes} onChange={(val) => setSelectedAccTypes(val as string[])}>
+                  <Wrap spacing={3}>
+                    {accTypes.map((a) => (
+                      <WrapItem key={a.id}>
+                        <Checkbox value={a.id} colorScheme="blue" size="sm">
+                          <Text fontSize="13px" color="ink.900">{a.name}</Text>
+                        </Checkbox>
+                      </WrapItem>
+                    ))}
+                  </Wrap>
+                </CheckboxGroup>
+                <Text fontSize="11px" color="ink.500" mt={2}>Hech narsa tanlanmasa, barcha turlar ruxsat etiladi.</Text>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => { resetForm(); onEditClose(); }}>Bekor qilish</Button>
+            <Button onClick={updateZone} colorScheme="blue">Saqlash</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

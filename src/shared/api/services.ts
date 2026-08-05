@@ -234,6 +234,7 @@ export async function createZoneApi(data: {
   code: string;
   requiresAccessControl: boolean;
   description?: string;
+  allowedAccreditationTypeIds?: string[];
 }): Promise<Zone> {
   const z = await apiClient(ENDPOINTS.ZONES.BASE, {
     method: "POST",
@@ -247,6 +248,28 @@ export async function createZoneApi(data: {
     scanPoints: 1,
     currentInside: 0,
     capacity: (z.description || data.description) && (z.description || data.description).includes("Sig'imi: ") ? parseInt((z.description || data.description).split("Sig'imi: ")[1]) : undefined,
+  };
+}
+
+export async function updateZoneApi(id: string, data: {
+  name?: string;
+  code?: string;
+  requiresAccessControl?: boolean;
+  description?: string;
+  allowedAccreditationTypeIds?: string[];
+}): Promise<Zone> {
+  const z = await apiClient(`${ENDPOINTS.ZONES.BASE}/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+  return {
+    id: z.id,
+    code: z.code,
+    name: z.name,
+    kind: z.requiresAccessControl ? "kirish_chiqish" : "ochiq",
+    scanPoints: z.devices?.length || 1,
+    currentInside: 0,
+    capacity: z.description && z.description.includes("Sig'imi: ") ? parseInt(z.description.split("Sig'imi: ")[1]) : undefined,
   };
 }
 
