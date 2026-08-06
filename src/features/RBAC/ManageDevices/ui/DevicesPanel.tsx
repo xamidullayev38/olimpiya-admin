@@ -12,49 +12,25 @@ import {
   Th,
   Td,
   HStack,
-  VStack,
   Text,
   Badge,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  ModalCloseButton,
-  useDisclosure,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
   Spinner,
   useToast,
-  Code,
-  Alert,
-  AlertIcon,
 } from "@chakra-ui/react";
-import { LuPlus, LuSmartphone, LuBan } from "react-icons/lu";
-import { ScannerDevice, Zone } from "@/shared/types";
-import { fetchDevices, createDeviceApi, revokeDeviceApi, fetchZones } from "@/shared/api/services";
+import { LuSmartphone, LuBan } from "react-icons/lu";
+import { ScannerDevice } from "@/shared/types";
+import { fetchDevices, revokeDeviceApi } from "@/shared/api/services";
 
 export function DevicesPanel() {
   const [devices, setDevices] = useState<ScannerDevice[]>([]);
-  const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
-  const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
-
-  const [name, setName] = useState("");
-  const [zoneId, setZoneId] = useState("");
-  const [createdDevice, setCreatedDevice] = useState<{ id: string; key: string } | null>(null);
 
   async function loadData() {
     setLoading(true);
     try {
       const dData = await fetchDevices();
-      const zData = await fetchZones();
       setDevices(dData);
-      setZones(zData);
     } catch {
       // silent catch
     } finally {
@@ -66,24 +42,6 @@ export function DevicesPanel() {
     loadData();
   }, []);
 
-  async function handleCreate() {
-    if (!name.trim()) {
-      toast({ title: "Qurilma nomi kiritilishi shart", status: "warning", duration: 2500 });
-      return;
-    }
-    try {
-      const created = await createDeviceApi({
-        name: name.trim(),
-        zoneId: zoneId || undefined,
-      });
-      setCreatedDevice({ id: created.id, key: created.deviceKey || "—" });
-      toast({ title: "Qurilma muvaffaqiyatli ro'yxatga olindi", status: "success", duration: 3000 });
-      loadData();
-    } catch (err: any) {
-      toast({ title: "Qurilma yaratishda xatolik", description: err.message, status: "error", duration: 3000 });
-    }
-  }
-
   async function handleRevoke(id: string) {
     const ok = await revokeDeviceApi(id);
     if (ok) {
@@ -94,19 +52,10 @@ export function DevicesPanel() {
     }
   }
 
-  function handleCloseModal() {
-    setName("");
-    setZoneId("");
-    setCreatedDevice(null);
-    onClose();
-  }
-
   return (
     <>
-      <Flex justify="flex-end" mb={4}>
-        <Button leftIcon={<LuPlus size={15} />} onClick={onOpen}>
-          Yangi skaner qurilma ulash
-        </Button>
+      <Flex justify="space-between" align="center" mb={4}>
+        <Text color="ink.500" fontSize="sm">Skaner qurilmalar endi mobil ilovadan tizimga kirganda avtomatik ro'yxatga olinadi.</Text>
       </Flex>
 
       {loading ? (
@@ -119,6 +68,7 @@ export function DevicesPanel() {
             <Thead>
               <Tr>
                 <Th>Qurilma nomi</Th>
+                <Th>Mas'ul xodim</Th>
                 <Th>Biriktirilgan zona</Th>
                 <Th>Holati</Th>
                 <Th>Oxirgi faollik</Th>
@@ -126,7 +76,7 @@ export function DevicesPanel() {
               </Tr>
             </Thead>
             <Tbody>
-              {devices.map((d) => (
+              {devices.map((d: any) => (
                 <Tr key={d.id} _hover={{ bg: "surface.700" }}>
                   <Td fontWeight="600" color="ink.900">
                     <HStack spacing={2}>
@@ -134,7 +84,8 @@ export function DevicesPanel() {
                       <Text>{d.name}</Text>
                     </HStack>
                   </Td>
-                  <Td>{d.zoneName || "—"}</Td>
+                  <Td>{d.assignedToUser?.fullName || d.assignedToUser?.username || "—"}</Td>
+                  <Td>{d.assignedToUser?.assignedZone?.name || d.currentZone?.name || d.zoneName || "—"}</Td>
                   <Td>
                     <Badge bg={d.status === "faol" ? "signal.greenDim" : "signal.redDim"} color={d.status === "faol" ? "signal.green" : "signal.red"}>
                       {d.status === "faol" ? "FAOL" : "BEKOR QILINGAN"}
@@ -152,8 +103,8 @@ export function DevicesPanel() {
               ))}
               {devices.length === 0 && (
                 <Tr>
-                  <Td colSpan={5} textAlign="center" py={6} color="ink.500">
-                    Hali birorta skaner qurilma ulangan emas.
+                  <Td colSpan={6} textAlign="center" py={6} color="ink.500">
+                    Hali birorta skaner qurilma ro'yxatga olinmagan.
                   </Td>
                 </Tr>
               )}
@@ -161,61 +112,6 @@ export function DevicesPanel() {
           </Table>
         </Box>
       )}
-
-      <Modal isOpen={isOpen} onClose={handleCloseModal} size="md">
-        <ModalOverlay />
-        <ModalContent className="glass-panel">
-          <ModalHeader color="ink.900">Skaner qurilmani ro'yxatga olish</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {createdDevice ? (
-              <VStack align="stretch" spacing={3}>
-                <Alert status="success" borderRadius="md" bg="rgba(63, 182, 127, 0.1)" color="signal.green">
-                  <AlertIcon />
-                  Qurilma yaratildi! Ushbu ma'lumotlarni mobil skaner ilovasiga kiriting.
-                </Alert>
-                <Text fontSize="13px" color="ink.500">Qurilma ID (Device ID):</Text>
-                <Code p={3} borderRadius="md" colorScheme="blue" fontSize="14px" textAlign="center" wordBreak="break-all">
-                  {createdDevice.id}
-                </Code>
-                <Text fontSize="13px" color="ink.500">Qurilma maxfiy kaliti (Device Key):</Text>
-                <Code p={3} borderRadius="md" colorScheme="yellow" fontSize="14px" textAlign="center" wordBreak="break-all">
-                  {createdDevice.key}
-                </Code>
-                <Text fontSize="11px" color="ink.300">⚠️ Ogohlantirish: Ushbu ma'lumotlar qayta ko'rsatilmadi, ularni nusxalab oling.</Text>
-              </VStack>
-            ) : (
-              <VStack spacing={4} align="stretch">
-                <FormControl>
-                  <FormLabel fontSize="13px" color="ink.500">Qurilma nomi (masalan: Skaner №1)</FormLabel>
-                  <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Skaner №1 — Asosiy kirish" />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="13px" color="ink.500">Biriktiriladigan zona</FormLabel>
-                  <Select value={zoneId} onChange={(e) => setZoneId(e.target.value)}>
-                    <option value="">Zona biriktirilmagan</option>
-                    {zones.map((z) => (
-                      <option key={z.id || z.code} value={z.id}>
-                        {z.name} ({z.code})
-                      </option>
-                    ))}
-                  </Select>
-                </FormControl>
-              </VStack>
-            )}
-          </ModalBody>
-          <ModalFooter>
-            {createdDevice ? (
-              <Button onClick={handleCloseModal}>Yopish</Button>
-            ) : (
-              <>
-                <Button variant="ghost" mr={3} onClick={handleCloseModal}>Bekor qilish</Button>
-                <Button onClick={handleCreate}>Ro'yxatdan o'tkazish</Button>
-              </>
-            )}
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
     </>
   );
 }

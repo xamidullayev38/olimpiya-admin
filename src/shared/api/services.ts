@@ -334,7 +334,7 @@ export async function fetchMealSchedule(date?: string): Promise<MealWindow[]> {
 export async function fetchAccessLogs(params?: any): Promise<AccessLogEntry[]> {
   try {
     const data = await apiClient(ENDPOINTS.ACCESS_LOGS.BASE, { params });
-    const list = Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.data || data?.items || [];
     return list.map((l: any) => ({
       id: l.id,
       participantId: l.participantId || "",
@@ -355,7 +355,7 @@ export async function fetchAccessLogs(params?: any): Promise<AccessLogEntry[]> {
 export async function fetchMealLogs(params?: any): Promise<MealLogEntry[]> {
   try {
     const data = await apiClient(ENDPOINTS.MEAL_LOGS.BASE, { params });
-    const list = Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.data || data?.items || [];
     return list.map((l: any) => ({
       id: l.id,
       participantId: l.participantId || "",
@@ -511,7 +511,7 @@ export async function assignRolePermissionsApi(roleId: string, permissionIds: st
 export async function fetchAuditLogs(params?: any): Promise<AuditLogEntry[]> {
   try {
     const data = await apiClient(ENDPOINTS.AUDIT_LOGS.BASE, { params });
-    const list = Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.data || data?.items || [];
     return list.map((a: any) => ({
       id: a.id,
       actor: a.user ? a.user.fullName : "Tizim",
@@ -555,7 +555,7 @@ export async function fetchParticipantHistory(id: string): Promise<any[]> {
 export async function fetchDeniedAccessLogs(): Promise<AccessLogEntry[]> {
   try {
     const data = await apiClient(ENDPOINTS.ACCESS_LOGS.DENIED);
-    const list = Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.data || data?.items || [];
     return list.map((l: any) => ({
       id: l.id,
       participantId: l.participantId || "",
