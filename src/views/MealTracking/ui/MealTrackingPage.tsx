@@ -18,7 +18,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import { LuUtensils, LuClock, LuCircleCheck, LuCircleX } from "react-icons/lu";
+import { LuUtensils, LuClock, LuCircleCheck, LuCircleX, LuArrowDownUp } from "react-icons/lu";
 import Topbar from "@/widgets/Topbar/ui/Topbar";
 import StatusPill from "@/shared/ui/StatusPill/StatusPill";
 import { fetchMealSchedule, fetchMealLogs } from "@/shared/api/services";
@@ -36,6 +36,7 @@ const ACC_COLORS: Record<string, { color: string; name: string }> = {
 
 export default function MealTrackingPage() {
   const [filter, setFilter] = useState<MealType | "ALL">("ALL");
+  const [sortOption, setSortOption] = useState("TIME_DESC");
   const [schedule, setSchedule] = useState<MealWindow[]>([]);
   const [logs, setLogs] = useState<MealLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,10 +58,27 @@ export default function MealTrackingPage() {
     loadData();
   }, []);
 
-  const filtered = useMemo(
-    () => (filter === "ALL" ? logs : logs.filter((m) => m.mealType === filter)),
-    [filter, logs]
-  );
+  const sortedAndFiltered = useMemo(() => {
+    let result = filter === "ALL" ? logs : logs.filter((m) => m.mealType === filter);
+    result = [...result];
+
+    switch (sortOption) {
+      case "NAME_ASC":
+        result.sort((a, b) => a.participantName.localeCompare(b.participantName));
+        break;
+      case "NAME_DESC":
+        result.sort((a, b) => b.participantName.localeCompare(a.participantName));
+        break;
+      case "TIME_ASC":
+        result.reverse();
+        break;
+      case "TIME_DESC":
+      default:
+        break;
+    }
+
+    return result;
+  }, [filter, logs, sortOption]);
 
   const granted = logs.filter((m) => m.result === "ruxsat").length;
   const denied = logs.filter((m) => m.result === "rad").length;
@@ -129,7 +147,7 @@ export default function MealTrackingPage() {
               ))}
             </Grid>
 
-            <Flex justify="space-between" align="center" mb={4}>
+            <Flex justify="space-between" align="center" mb={4} wrap="wrap" gap={4}>
               <HStack spacing={5}>
                 <HStack spacing={1.5} color="signal.green">
                   <LuCircleCheck size={15} />
@@ -140,18 +158,39 @@ export default function MealTrackingPage() {
                   <Text fontSize="13px" fontWeight="600">{denied} ta rad etildi</Text>
                 </HStack>
               </HStack>
-              <Select
-                maxW="220px"
-                bg="surface.800"
-                borderColor="line.900"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as MealType | "ALL")}
-              >
-                <option value="ALL">Barcha ovqat turlari</option>
-                <option value="Nonushta">Nonushta</option>
-                <option value="Tushlik">Tushlik</option>
-                <option value="Kechki ovqat">Kechki ovqat</option>
-              </Select>
+              
+              <HStack spacing={3}>
+                <HStack spacing={2} bg="surface.800" px={3} py={1.5} borderRadius="md" border="1px solid" borderColor="line.900">
+                  <LuArrowDownUp size={14} color="#8D96A8" />
+                  <Select
+                    variant="unstyled"
+                    size="sm"
+                    w="150px"
+                    fontSize="13px"
+                    color="ink.900"
+                    value={sortOption}
+                    onChange={(e) => setSortOption(e.target.value)}
+                  >
+                    <option value="TIME_DESC">Vaqt (Yangi oldin)</option>
+                    <option value="TIME_ASC">Vaqt (Eski oldin)</option>
+                    <option value="NAME_ASC">Ism (A-Z)</option>
+                    <option value="NAME_DESC">Ism (Z-A)</option>
+                  </Select>
+                </HStack>
+
+                <Select
+                  maxW="220px"
+                  bg="surface.800"
+                  borderColor="line.900"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value as MealType | "ALL")}
+                >
+                  <option value="ALL">Barcha ovqat turlari</option>
+                  <option value="Nonushta">Nonushta</option>
+                  <option value="Tushlik">Tushlik</option>
+                  <option value="Kechki ovqat">Kechki ovqat</option>
+                </Select>
+              </HStack>
             </Flex>
 
             <Box bg="surface.800" border="1px solid" borderColor="line.900" borderRadius="lg" overflow="hidden">
@@ -168,7 +207,7 @@ export default function MealTrackingPage() {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {filtered.map((m) => {
+                  {sortedAndFiltered.map((m) => {
                     const acc = ACC_COLORS[m.accreditation] || { color: "#2563eb", name: m.accreditation || "Ishtirokchi" };
                     return (
                       <Tr key={m.id} _hover={{ bg: "surface.700" }}>
@@ -180,7 +219,7 @@ export default function MealTrackingPage() {
                         </Td>
                         <Td>{m.mealType}</Td>
                         <Td fontFamily="mono" fontSize="12px">{m.timestamp}</Td>
-                        <Td>{m.point}</Td>
+                        <Td fontFamily="mono" fontSize="12px" color="ink.500">{m.point}</Td>
                         <Td>
                           <StatusPill
                             label={m.result === "ruxsat" ? "RUXSAT" : "RAD"}

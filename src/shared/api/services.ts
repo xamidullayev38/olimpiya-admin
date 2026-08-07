@@ -357,11 +357,37 @@ export async function fetchAccessLogs(params?: any): Promise<AccessLogEntry[]> {
       timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
-      device: l.deviceId || "SCN",
+      device: l.device?.name || l.deviceId || "SCN",
     }));
   } catch (e) {
     return [];
   }
+}
+
+export async function fetchAccessLogsPaginated(params?: any): Promise<{ items: AccessLogEntry[], total: number }> {
+  try {
+    const data = await apiClient(ENDPOINTS.ACCESS_LOGS.BASE, { params });
+    const list = data?.items || Array.isArray(data) ? data : data?.data || [];
+    const items = list.map((l: any) => ({
+      id: l.id,
+      participantId: l.participantId || "",
+      participantName: l.participant ? `${l.participant.firstName} ${l.participant.lastName}` : "Noma'lum",
+      accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
+      zoneCode: l.zone?.code || "ZONE",
+      direction: l.direction || "IN",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
+      result: l.result === "GRANTED" ? "ruxsat" : "rad",
+      reason: l.denyReason,
+      device: l.device?.name || l.deviceId || "SCN",
+    }));
+    return { items, total: data?.total || items.length };
+  } catch (e) {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function deleteAccessLogsApi(ids: string[]): Promise<void> {
+  await apiClient(`${ENDPOINTS.ACCESS_LOGS.BASE}?ids=${ids.join(",")}`, { method: "DELETE" });
 }
 
 export async function fetchMealLogs(params?: any): Promise<MealLogEntry[]> {
@@ -377,11 +403,36 @@ export async function fetchMealLogs(params?: any): Promise<MealLogEntry[]> {
       timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
-      point: l.deviceId || "OSHXONA",
+      point: l.device?.name || l.deviceId || "OSHXONA",
     }));
   } catch (e) {
     return [];
   }
+}
+
+export async function fetchMealLogsPaginated(params?: any): Promise<{ items: MealLogEntry[], total: number }> {
+  try {
+    const data = await apiClient(ENDPOINTS.MEAL_LOGS.BASE, { params });
+    const list = data?.items || Array.isArray(data) ? data : data?.data || [];
+    const items = list.map((l: any) => ({
+      id: l.id,
+      participantId: l.participantId || "",
+      participantName: l.participant ? `${l.participant.firstName} ${l.participant.lastName}` : "Noma'lum",
+      accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
+      mealType: l.mealSchedule?.mealType === "BREAKFAST" ? "Nonushta" : l.mealSchedule?.mealType === "LUNCH" ? "Tushlik" : "Kechki ovqat",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
+      result: l.result === "GRANTED" ? "ruxsat" : "rad",
+      reason: l.denyReason,
+      point: l.device?.name || l.deviceId || "OSHXONA",
+    }));
+    return { items, total: data?.total || items.length };
+  } catch (e) {
+    return { items: [], total: 0 };
+  }
+}
+
+export async function deleteMealLogsApi(ids: string[]): Promise<void> {
+  await apiClient(`${ENDPOINTS.MEAL_LOGS.BASE}?ids=${ids.join(",")}`, { method: "DELETE" });
 }
 
 export async function fetchUsers(): Promise<SystemUser[]> {
