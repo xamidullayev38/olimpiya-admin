@@ -367,7 +367,7 @@ export async function fetchAccessLogs(params?: any): Promise<AccessLogEntry[]> {
 export async function fetchAccessLogsPaginated(params?: any): Promise<{ items: AccessLogEntry[], total: number }> {
   try {
     const data = await apiClient(ENDPOINTS.ACCESS_LOGS.BASE, { params });
-    const list = data?.items || Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.items || data?.data || [];
     const items = list.map((l: any) => ({
       id: l.id,
       participantId: l.participantId || "",
@@ -413,7 +413,7 @@ export async function fetchMealLogs(params?: any): Promise<MealLogEntry[]> {
 export async function fetchMealLogsPaginated(params?: any): Promise<{ items: MealLogEntry[], total: number }> {
   try {
     const data = await apiClient(ENDPOINTS.MEAL_LOGS.BASE, { params });
-    const list = data?.items || Array.isArray(data) ? data : data?.data || [];
+    const list = Array.isArray(data) ? data : data?.items || data?.data || [];
     const items = list.map((l: any) => ({
       id: l.id,
       participantId: l.participantId || "",
