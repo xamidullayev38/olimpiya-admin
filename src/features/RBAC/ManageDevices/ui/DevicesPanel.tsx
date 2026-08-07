@@ -17,9 +17,9 @@ import {
   Spinner,
   useToast,
 } from "@chakra-ui/react";
-import { LuSmartphone, LuBan } from "react-icons/lu";
+import { LuSmartphone, LuBan, LuTrash2 } from "react-icons/lu";
 import { ScannerDevice } from "@/shared/types";
-import { fetchDevices, revokeDeviceApi } from "@/shared/api/services";
+import { fetchDevices, revokeDeviceApi, deleteDeviceApi } from "@/shared/api/services";
 
 export function DevicesPanel() {
   const [devices, setDevices] = useState<ScannerDevice[]>([]);
@@ -93,11 +93,22 @@ export function DevicesPanel() {
                   </Td>
                   <Td fontFamily="mono" fontSize="12px">{d.lastSeenAt || "—"}</Td>
                   <Td align="right">
-                    {d.status === "faol" && (
-                      <Button size="xs" colorScheme="red" variant="ghost" leftIcon={<LuBan size={13} />} onClick={() => handleRevoke(d.id)}>
-                        Bekor qilish
+                    <HStack spacing={2} justify="flex-end">
+                      {d.status === "faol" && (
+                        <Button size="xs" colorScheme="red" variant="ghost" leftIcon={<LuBan size={13} />} onClick={() => handleRevoke(d.id)}>
+                          Bekor qilish
+                        </Button>
+                      )}
+                      <Button size="xs" colorScheme="red" variant="outline" leftIcon={<LuTrash2 size={13} />} onClick={async () => {
+                        if (window.confirm("Rostdan ham ushbu qurilmani o'chirmoqchimisiz?")) {
+                          await deleteDeviceApi(d.id);
+                          toast({ title: "Qurilma o'chirildi", status: "success", duration: 2500 });
+                          loadData();
+                        }
+                      }}>
+                        O'chirish
                       </Button>
-                    )}
+                    </HStack>
                   </Td>
                 </Tr>
               ))}

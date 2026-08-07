@@ -22,6 +22,9 @@ import { fetchLiveStats, fetchDeniedAccessLogs } from "@/shared/api/services";
 import { io } from "socket.io-client";
 import { API_BASE_URL } from "@/shared/api/endpoints";
 import { getAccessToken } from "@/shared/api/client";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+
+const PIE_COLORS = ["#3FB67F", "#4C8DFF", "#E8A23D", "#D4A853", "#E5484D", "#9C7830", "#8D96A8"];
 
 const ACC_COLORS: Record<string, string> = {
   ATH: "#4C8DFF",
@@ -51,7 +54,7 @@ export default function DashboardPage() {
         const deniedLogs = await fetchDeniedAccessLogs();
         setStats(liveStats);
         setTotals(totals);
-        setDenials(deniedLogs.slice(0, 6));
+        setDenials(deniedLogs.slice(0, 10));
       } catch {
         // silent catch
       } finally {
@@ -177,54 +180,92 @@ export default function DashboardPage() {
                       </Text>
                       <Box w="8px" h="8px" borderRadius="full" bg="signal.green" boxShadow="0 0 12px #3FB67F" />
                     </Flex>
-                    <VStack align="stretch" spacing={5}>
-                      {stats.map((z) => {
-                        const pct = z.capacity ? Math.round((z.inside / z.capacity) * 100) : null;
-                        return (
-                          <Box key={z.zoneCode} p={3} borderRadius="lg" bg="rgba(255, 255, 255, 0.02)" border="1px solid" borderColor="line.900" transition="all 0.2s" _hover={{ bg: "rgba(255,255,255, 0.04)" }}>
-                            <Flex justify="space-between" mb={2}>
-                              <HStack spacing={3}>
-                                <Flex w="32px" h="32px" borderRadius="md" bg="surface.700" align="center" justify="center" border="1px solid" borderColor="line.800">
-                                  <LuMapPin size={14} color="#D4A853" />
+                    <Flex direction={{ base: "column", lg: "row" }} gap={8} align="center">
+                      <Box flex={1} w="100%">
+                        <VStack align="stretch" spacing={4}>
+                          {stats.map((z, index) => {
+                            const pct = z.capacity ? Math.round((z.inside / z.capacity) * 100) : null;
+                            const color = PIE_COLORS[index % PIE_COLORS.length];
+                            return (
+                              <Box key={z.zoneCode} p={3} borderRadius="lg" bg="rgba(255, 255, 255, 0.02)" border="1px solid" borderColor="line.900" transition="all 0.2s" _hover={{ bg: "rgba(255,255,255, 0.04)" }}>
+                                <Flex justify="space-between" mb={2}>
+                                  <HStack spacing={3}>
+                                    <Flex w="32px" h="32px" borderRadius="md" bg="surface.700" align="center" justify="center" border="1px solid" borderColor="line.800">
+                                      <LuMapPin size={14} color={color} />
+                                    </Flex>
+                                    <VStack align="start" spacing={0}>
+                                      <Text fontSize="14px" fontWeight="600" color="ink.900">
+                                        {z.zoneName}
+                                      </Text>
+                                      <Text fontFamily="mono" fontSize="11px" color="ink.500">
+                                        {z.zoneCode}
+                                      </Text>
+                                    </VStack>
+                                  </HStack>
+                                  <HStack spacing={4} fontSize="13px" color="ink.500">
+                                    <Text>Kirish: <Text as="span" color="ink.900" fontWeight="500">{z.inToday}</Text></Text>
+                                    <Text>Chiqish: <Text as="span" color="ink.900" fontWeight="500">{z.outToday}</Text></Text>
+                                    <Badge bg="surface.900" color="ink.900" border="1px solid" borderColor="line.800" px={2} py={0.5} borderRadius="md" fontFamily="mono">
+                                      {z.inside} {z.capacity ? `/ ${z.capacity}` : ""}
+                                    </Badge>
+                                  </HStack>
                                 </Flex>
-                                <VStack align="start" spacing={0}>
-                                  <Text fontSize="14px" fontWeight="600" color="ink.900">
-                                    {z.zoneName}
-                                  </Text>
-                                  <Text fontFamily="mono" fontSize="11px" color="ink.500">
-                                    {z.zoneCode}
-                                  </Text>
-                                </VStack>
-                              </HStack>
-                              <HStack spacing={4} fontSize="13px" color="ink.500">
-                                <Text>Kirish: <Text as="span" color="ink.900" fontWeight="500">{z.inToday}</Text></Text>
-                                <Text>Chiqish: <Text as="span" color="ink.900" fontWeight="500">{z.outToday}</Text></Text>
-                                <Badge bg="surface.900" color="ink.900" border="1px solid" borderColor="line.800" px={2} py={0.5} borderRadius="md" fontFamily="mono">
-                                  {z.inside} {z.capacity ? `/ ${z.capacity}` : ""}
-                                </Badge>
-                              </HStack>
-                            </Flex>
-                            {pct !== null && (
-                              <Progress
-                                value={pct}
-                                size="xs"
-                                borderRadius="full"
-                                bg="surface.900"
-                                border="1px solid"
-                                borderColor="line.900"
-                                sx={{
-                                  "& > div": {
-                                    background:
-                                      pct > 85 ? "linear-gradient(90deg, #E5484D80, #E5484D)" : pct > 60 ? "linear-gradient(90deg, #E8A23D80, #E8A23D)" : "linear-gradient(90deg, #3FB67F80, #3FB67F)",
-                                    boxShadow: pct > 85 ? "0 0 10px #E5484D40" : "0 0 10px #3FB67F40",
-                                  },
-                                }}
+                                {pct !== null && (
+                                  <Progress
+                                    value={pct}
+                                    size="xs"
+                                    borderRadius="full"
+                                    bg="surface.900"
+                                    border="1px solid"
+                                    borderColor="line.900"
+                                    sx={{
+                                      "& > div": {
+                                        background: pct > 85 ? "linear-gradient(90deg, #E5484D80, #E5484D)" : `linear-gradient(90deg, ${color}80, ${color})`,
+                                        boxShadow: pct > 85 ? "0 0 10px #E5484D40" : `0 0 10px ${color}40`,
+                                      },
+                                    }}
+                                  />
+                                )}
+                              </Box>
+                            );
+                          })}
+                        </VStack>
+                      </Box>
+                      {totalInside > 0 && (
+                        <Box w={{ base: "100%", lg: "220px" }} h="220px" position="relative" flexShrink={0}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={stats.filter(z => z.inside > 0)}
+                                dataKey="inside"
+                                nameKey="zoneName"
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={70}
+                                outerRadius={90}
+                                stroke="none"
+                                paddingAngle={2}
+                              >
+                                {stats.filter(z => z.inside > 0).map((entry, index) => {
+                                  const originalIndex = stats.findIndex(s => s.zoneCode === entry.zoneCode);
+                                  return (
+                                    <Cell key={`cell-${index}`} fill={PIE_COLORS[originalIndex % PIE_COLORS.length]} />
+                                  );
+                                })}
+                              </Pie>
+                              <Tooltip 
+                                contentStyle={{ backgroundColor: "#1B2028", borderColor: "#2D3748", borderRadius: "8px" }}
+                                itemStyle={{ color: "#E2E8F0", fontSize: "13px" }}
                               />
-                            )}
-                          </Box>
-                        );
-                      })}
-                    </VStack>
+                            </PieChart>
+                          </ResponsiveContainer>
+                          <Flex position="absolute" top={0} left={0} right={0} bottom={0} align="center" justify="center" pointerEvents="none" direction="column">
+                            <Text fontSize="12px" color="ink.500">Jami ichkarida</Text>
+                            <Text fontSize="28px" fontWeight="bold" color="ink.900" lineHeight="1" mt={1}>{totalInside}</Text>
+                          </Flex>
+                        </Box>
+                      )}
+                    </Flex>
                   </Box>
                 </GridItem>
 
@@ -244,7 +285,7 @@ export default function DashboardPage() {
                     <Text fontSize="13px" color="ink.500" mb={6}>
                       Shubhali holatlarni tezkor aniqlash
                     </Text>
-                    <VStack align="stretch" spacing={4}>
+                    <VStack align="stretch" spacing={4} maxH="550px" overflowY="auto" pr={2} sx={{ "&::-webkit-scrollbar": { width: "4px" }, "&::-webkit-scrollbar-thumb": { bg: "surface.600", borderRadius: "full" } }}>
                       {denials.map((d) => {
                         const color = ACC_COLORS[d.accreditation] || "#2563eb";
                         return (
