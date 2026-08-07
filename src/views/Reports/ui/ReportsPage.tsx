@@ -207,7 +207,7 @@ export default function ReportsPage() {
           </Flex>
         </Flex>
 
-        <Tabs variant="unstyled" index={activeTab} onChange={(index) => setActiveTab(index)}>
+        <Tabs isLazy variant="unstyled" index={activeTab} onChange={(index) => setActiveTab(index)}>
           <TabList
             bg="surface.800"
             border="1px solid"
