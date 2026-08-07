@@ -22,6 +22,18 @@ function mapBadgeStatus(status?: string): BadgeStatus {
   return "faol";
 }
 
+export function formatDateTime(dateString: string | undefined | null): string {
+  if (!dateString) return "—";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return dateString.replace("T", " ").slice(0, 19);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  } catch {
+    return dateString;
+  }
+}
+
 export async function fetchLiveStats(): Promise<{
   liveStats: LiveStat[];
   totals: {
