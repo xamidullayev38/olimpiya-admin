@@ -220,7 +220,7 @@ export async function fetchZones(): Promise<Zone[]> {
           status: d.status === "ACTIVE" ? "faol" : "bekor_qilingan",
           zoneId: z.id,
           zoneName: z.name,
-          lastSeenAt: d.lastSeenAt ? d.lastSeenAt.replace("T", " ").slice(0, 19) : "—",
+          lastSeenAt: d.lastSeenAt ? formatDateTime(d.lastSeenAt) : "—",
         })) : [],
       }));
     }
@@ -342,7 +342,7 @@ export async function fetchAccessLogs(params?: any): Promise<AccessLogEntry[]> {
       accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
       zoneCode: l.zone?.code || "ZONE",
       direction: l.direction || "IN",
-      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
       device: l.deviceId || "SCN",
@@ -362,7 +362,7 @@ export async function fetchMealLogs(params?: any): Promise<MealLogEntry[]> {
       participantName: l.participant ? `${l.participant.firstName} ${l.participant.lastName}` : "Noma'lum",
       accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
       mealType: l.mealSchedule?.mealType === "BREAKFAST" ? "Nonushta" : l.mealSchedule?.mealType === "LUNCH" ? "Tushlik" : "Kechki ovqat",
-      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
       point: l.deviceId || "OSHXONA",
@@ -383,7 +383,7 @@ export async function fetchUsers(): Promise<SystemUser[]> {
         email: u.email,
         roleIds: u.roles?.map((r: any) => r.role?.id || r.roleId || r.role?.name) || [],
         status: u.isActive ? "faol" : "bloklangan",
-        lastActive: u.lastLoginAt ? u.lastLoginAt.replace("T", " ").slice(0, 19) : "—",
+        lastActive: u.lastLoginAt ? formatDateTime(u.lastLoginAt) : "—",
         assignedZoneId: u.assignedZoneId || u.assignedZone?.id,
         assignedZone: u.assignedZone ? { id: u.assignedZone.id, name: u.assignedZone.name, code: u.assignedZone.code } : undefined,
       }));
@@ -442,7 +442,7 @@ export async function updateUserApi(id: string, data: {
     email: u.email,
     roleIds: data.roleIds || (u.roles?.map((r: any) => r.role?.id || r.roleId) || []),
     status: u.isActive ? "faol" : "bloklangan",
-    lastActive: u.lastLoginAt ? u.lastLoginAt.replace("T", " ").slice(0, 19) : "—",
+    lastActive: u.lastLoginAt ? formatDateTime(u.lastLoginAt) : "—",
     assignedZoneId: u.assignedZoneId || u.assignedZone?.id,
     assignedZone: u.assignedZone,
   };
@@ -517,7 +517,7 @@ export async function fetchAuditLogs(params?: any): Promise<AuditLogEntry[]> {
       actor: a.user ? a.user.fullName : "Tizim",
       action: a.action,
       target: `${a.entityType || "entity"}:${a.entityId || ""}`,
-      timestamp: a.createdAt ? a.createdAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: a.createdAt ? formatDateTime(a.createdAt) : "—",
       details: a.metadata ? JSON.stringify(a.metadata) : undefined,
     }));
   } catch (e) {
@@ -534,7 +534,7 @@ export async function fetchParticipantHistory(id: string): Promise<any[]> {
       label: l.zone?.name || l.zoneId,
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
-      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
     }));
     const mealLogs = (data.mealLogs || []).map((l: any) => ({
       id: l.id,
@@ -542,7 +542,7 @@ export async function fetchParticipantHistory(id: string): Promise<any[]> {
       label: l.mealSchedule?.mealType === "BREAKFAST" ? "Nonushta" : l.mealSchedule?.mealType === "LUNCH" ? "Tushlik" : "Kechki ovqat",
       result: l.result === "GRANTED" ? "ruxsat" : "rad",
       reason: l.denyReason,
-      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
     }));
     return [...accessLogs, ...mealLogs].sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -563,7 +563,7 @@ export async function fetchDeniedAccessLogs(): Promise<AccessLogEntry[]> {
       accreditation: (l.participant?.accreditationType?.code || "ATH") as AccreditationCode,
       zoneCode: l.zone?.code || "ZONE",
       direction: l.direction || "IN",
-      timestamp: l.scannedAt ? l.scannedAt.replace("T", " ").slice(0, 19) : "—",
+      timestamp: l.scannedAt ? formatDateTime(l.scannedAt) : "—",
       result: "rad",
       reason: l.denyReason,
       device: l.deviceId || "SCN",
@@ -595,7 +595,7 @@ export async function fetchDevices(): Promise<any[]> {
         status: d.status === "ACTIVE" ? "faol" : "bekor_qilingan",
         zoneId: d.currentZoneId,
         zoneName: d.currentZone?.name || "—",
-        lastSeenAt: d.lastSeenAt ? d.lastSeenAt.replace("T", " ").slice(0, 19) : "—",
+        lastSeenAt: d.lastSeenAt ? formatDateTime(d.lastSeenAt) : "—",
       }));
     }
   } catch (e) {
